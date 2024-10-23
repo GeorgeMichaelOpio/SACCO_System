@@ -154,7 +154,7 @@
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="pages_financial_reporting_withdrawals.php" class="menu-link">
+                  <a href="pages_financial_reporting_transfers.php" class="menu-link">
                     <div data-i18n="Transfers">Transfers</div>
                   </a>
                 </li>
