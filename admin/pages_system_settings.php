@@ -23,9 +23,13 @@ if (isset($_POST['systemSettings'])) {
     $rc = $stmt->bind_param('ssss',  $sys_name,  $sys_logo, $sys_tagline, $id);
     $stmt->execute();
     if ($stmt) {
-      $success = "Settings Updated" && header("refresh:1; url=pages_system_settings.php");
+      $success = "Settings Updated";
+      echo "<script>
+              setTimeout(function() {
+                window.location.href = 'pages_system_settings.php';
+              }, 10000);
+            </script>";
     } else {
-      //inject alert that profile update task failed
       $info = "Please Try Again Or Try Later";
     }
   }
@@ -43,115 +47,141 @@ if (isset($_POST['systemSettings'])) {
   data-template="vertical-menu-template-free"
   data-style="light">
 
-  <?php include 'components/head.php'; ?>
+<?php include 'components/head.php'; ?>
 
-  <body>
-    <!-- Layout wrapper -->
+<body>
 
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
+  <?php include 'components/modal.php'; ?>
 
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-        
+  <!-- Layout wrapper -->
+
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu -->
+
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
         <!-- App Brand -->
         <?php include 'components/app_brand.php'; ?>
 
 
-          <div class="menu-inner-shadow"></div>
+        <div class="menu-inner-shadow"></div>
 
-           <!-- SideBar -->
+        <!-- SideBar -->
         <?php include 'components/side_bar.php'; ?>
-         
-          
-            
-        </aside>
-        <!-- / Menu -->
 
-        <!-- Layout container -->
-        <div class="layout-page">
-    
-            <!-- NavBar -->
-            <?php include 'components/nav_bar.php'; ?>
 
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-            <!-- Content -->
 
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <!-- Basic Layout -->
-              <div class="row">
-                <div class="col-xl">
-                  <div class="card mb-6">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                      <h5 class="mb-0">System Settings</h5>
-                    </div>
-                    <div class="card-body">
+      </aside>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+
+        <!-- NavBar -->
+        <?php include 'components/nav_bar.php'; ?>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Basic Layout -->
+            <div class="row">
+              <div class="col-xl">
+                <div class="card mb-6">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">System Settings</h5>
+                  </div>
+                  <div class="card-body">
                     <?php
-                /* Persisit System Settings On Brand */
-                $ret = "SELECT * FROM `ib_systemsettings` ";
-                $stmt = $mysqli->prepare($ret);
-                $stmt->execute(); //ok
-                $res = $stmt->get_result();
-                while ($sys = $res->fetch_object()) {
-                ?>
-                      <form>
+                    /* Persisit System Settings On Brand */
+                    $ret = "SELECT * FROM `ib_systemsettings` ";
+                    $stmt = $mysqli->prepare($ret);
+                    $stmt->execute(); //ok
+                    $res = $stmt->get_result();
+                    while ($sys = $res->fetch_object()) {
+                    ?>
+                      <form method="post" enctype="multipart/form-data" role="form">
+                        <input type="hidden" name="id" value="<?php echo $sys->id; ?>" />
+
                         <div class="form-floating form-floating-outline mb-6">
-                          <input type="text" class="form-control" id="basic-default-fullname"  value="<?php echo $sys->sys_name; ?>" />
-                          <label for="basic-default-fullname">Company Name</label>
+                          <input type="text" class="form-control" id="Sys_Name" name="sys_name" required value="<?php echo $sys->sys_name; ?>" />
+                          <label for="sys_name">Company Name</label>
                         </div>
+
                         <div class="form-floating form-floating-outline mb-6">
-                          <input type="text" class="form-control" id="basic-default-company" value="<?php echo $sys->sys_tagline; ?>" />
-                          <label for="basic-default-company">Company Tagline</label>
+                          <input type="text" class="form-control" id="Sys_Tagline" name="sys_tagline" required value="<?php echo $sys->sys_tagline; ?>" />
+                          <label for="sys_tagline">Company Tagline</label>
                         </div>
+
                         <div class="form-floating form-floating-outline mb-6">
-                          <input type="file" class="form-control" id="basic-default-company" placeholder="" />
-                          <label for="basic-default-company">System Logo</label>
+                          <input type="file" name="sys_logo" class="form-control" />
+                          <label for="Sys_Logo">System Logo</label>
                         </div>
-                        <button type="submit" class="btn btn-primary">Send</button>
+
+                        <button type="submit" name="systemSettings" class="btn btn-primary">Send</button>
                       </form>
                       <?php
-                } ?>
-                    </div>
+                      if (isset($err)) {
+                        echo "<script>alert('$err');</script>";
+                      }
+                      if (isset($info)) {
+                        echo "<script>alert('$info');</script>";
+                      }
+                      if (isset($success)) {
+                        echo "<script>
+                            setTimeout(function() {
+                            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                            successModal.show();
+                                  }, 0);
+                            </script>";
+                      }
+                      ?>
+
+                    <?php
+                    } ?>
                   </div>
                 </div>
               </div>
             </div>
-            <!-- / Content -->
-
-
-            <div class="content-backdrop fade"></div>
           </div>
-          <!-- Content wrapper -->
+          <!-- / Content -->
+
+
+          <div class="content-backdrop fade"></div>
         </div>
-        <!-- / Layout page -->
+        <!-- Content wrapper -->
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+      <!-- / Layout page -->
     </div>
-    <!-- / Layout wrapper -->
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
 
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="../assets/vendor/js/bootstrap.js"></script>
+  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
 
-    <!-- endbuild -->
+  <!-- endbuild -->
 
-    <!-- Vendors JS -->
+  <!-- Vendors JS -->
 
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
 
-    <!-- Page JS -->
+  <!-- Page JS -->
 
-    <!-- Place this tag before closing body tag for github widget button. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
+  <!-- Place this tag before closing body tag for github widget button. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+
 </html>

@@ -31,48 +31,48 @@ if (isset($_GET['deleteBankAccType'])) {
   data-template="vertical-menu-template-free"
   data-style="light">
 
-  <?php include("components/head.php"); ?>
+<?php include("components/head.php"); ?>
 
-  <body>
-    <!-- Layout wrapper -->
+<body>
+  <!-- Layout wrapper -->
 
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu -->
 
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-        
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
         <!-- App Brand -->
         <?php include 'components/app_brand.php'; ?>
 
 
-          <div class="menu-inner-shadow"></div>
+        <div class="menu-inner-shadow"></div>
 
-           <!-- SideBar -->
+        <!-- SideBar -->
         <?php include 'components/side_bar.php'; ?>
-         
-          
-            
-        </aside>
-        <!-- / Menu -->
 
-        <!-- Layout container -->
-        <div class="layout-page">
-    
-            <!-- NavBar -->
-            <?php include 'components/nav_bar.php'; ?>
 
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-            <!-- Content -->
 
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <!-- Hoverable Table rows -->
-              <div class="card">
-                <h5 class="card-header">Banking Account Types</h5>
-                <div class="table-responsive text-nowrap">
-                  <table class="table table-hover">
-                    <thead>
+      </aside>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+
+        <!-- NavBar -->
+        <?php include 'components/nav_bar.php'; ?>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Hoverable Table rows -->
+            <div class="card">
+              <h5 class="card-header">Banking Account Types</h5>
+              <div class="table-responsive">
+                <table id="export" class="table table-hover table-bordered table-striped">
+                  <thead>
                     <tr>
                       <th>#</th>
                       <th>Name</th>
@@ -80,8 +80,8 @@ if (isset($_GET['deleteBankAccType'])) {
                       <th>Code</th>
                       <th>Action</th>
                     </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
+                  </thead>
+                  <tbody class="table-border-bottom-0">
 
                     <?php
                     //fetch all ib_acc_types
@@ -95,7 +95,7 @@ if (isset($_GET['deleteBankAccType'])) {
                     ?>
 
                       <tr>
-                  <td><?php echo $cnt; ?></td>
+                        <td><?php echo $cnt; ?></td>
                         <td><?php echo $row->name; ?></td>
                         <td><?php echo $row->rate; ?>%</td>
                         <td><?php echo $row->code; ?></td>
@@ -105,59 +105,56 @@ if (isset($_GET['deleteBankAccType'])) {
                               <i class="ri-more-2-line"></i>
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="javascript:void(0);"
-                                ><i class="ri-pencil-line me-1"></i> Edit</a
-                              >
-                              <a class="dropdown-item" href="javascript:void(0);"
-                                ><i class="ri-delete-bin-6-line me-1"></i> Delete</a
-                              >
+                              <a class="dropdown-item" href="pages_update_accs.php?code=<?php echo $row->code; ?>"><i class="ri-pencil-line me-1"></i> Edit</a>
+                              <a class="dropdown-item" href="pages_manage_accs.php?deleteBankAccType=<?php echo $row->acctype_id; ?>"><i class="ri-delete-bin-6-line me-1"></i> Delete</a>
                             </div>
                           </div>
                         </td>
                       </tr>
-                      <?php $cnt = $cnt + 1;
+                    <?php $cnt = $cnt + 1;
                     } ?>
-                    </tbody>
-                  </table>
-                </div>
+                  </tbody>
+                </table>
               </div>
-              <!--/ Hoverable Table rows -->
-
             </div>
-            <!-- / Content -->
+            <!--/ Hoverable Table rows -->
 
-            <div class="content-backdrop fade"></div>
           </div>
-          <!-- Content wrapper -->
+          <!-- / Content -->
+
+          <div class="content-backdrop fade"></div>
         </div>
-        <!-- / Layout page -->
+        <!-- Content wrapper -->
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+      <!-- / Layout page -->
     </div>
-    <!-- / Layout wrapper -->
 
-   
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
 
-    <!-- endbuild -->
 
-    <!-- Vendors JS -->
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="../assets/vendor/js/bootstrap.js"></script>
+  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
 
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
+  <!-- endbuild -->
 
-    <!-- Page JS -->
+  <!-- Vendors JS -->
 
-    <!-- Place this tag before closing body tag for github widget button. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
+
+  <!-- Page JS -->
+
+  <!-- Place this tag before closing body tag for github widget button. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+
 </html>

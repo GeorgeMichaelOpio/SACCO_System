@@ -17,160 +17,202 @@ $admin_id = $_SESSION['admin_id'];
   data-assets-path="../assets/"
   data-template="vertical-menu-template-free"
   data-style="light">
-  
-  <?php include("components/head.php"); ?>
 
-  <body>
-    <!-- Layout wrapper -->
+<?php include("components/head.php"); ?>
 
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
+<body>
+  <!-- Layout wrapper -->
 
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-        
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu -->
+
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
         <!-- App Brand -->
         <?php include 'components/app_brand.php'; ?>
 
 
-          <div class="menu-inner-shadow"></div>
+        <div class="menu-inner-shadow"></div>
 
-           <!-- SideBar -->
+        <!-- SideBar -->
         <?php include 'components/side_bar.php'; ?>
-         
-          
-            
-        </aside>
-        <!-- / Menu -->
 
-        <!-- Layout container -->
-        <div class="layout-page">
-    
-            <!-- NavBar -->
-            <?php include 'components/nav_bar.php'; ?>
 
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-            <!-- Content -->
 
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <div class="row gy-6">
-                <!-- Data Tables -->
-                <div class="col-12">
-                  <div class="card overflow-hidden">
+      </aside>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+
+        <!-- NavBar -->
+        <?php include 'components/nav_bar.php'; ?>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="row gy-6">
+              <!-- Data Tables -->
+              <div class="col-12">
+                <div class="card overflow-hidden">
                   <div class="card-header">
-                      <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">Withdrawals</h5>
-                        <div class="dropdown">
-                          <button
-                            class="btn text-muted p-0"
-                            type="button"
-                            id="transactionID"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false">
-                            <i class="ri-more-2-line ri-24px"></i>
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="transactionID">
-                            <a class="dropdown-item" href="javascript:void(0);">Print</a>
-                            <a class="dropdown-item" href="javascript:void(0);">Export As Excel Sheet</a>
-                          </div>
-                        </div>
-                      </div>
-                      <h7>All Transactions Under Withdrawal Category</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <h5 class="card-title m-0 me-2">Withdrawals</h5>
                     </div>
-                  
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                        <tr>
-                      <th>#</th>
-                      <th>Transaction Code</th>
-                      <th>Account No.</th>
-                      <th>Amount</th>
-                      <th>Acc. Owner</th>
-                      <th>Timestamp</th>
+                    <h7>All Transactions Under Withdrawal Category</h5>
+                  </div>
 
-                    </tr>
-                        </thead>
-                        <tbody>
+                  <div class="table-responsive">
+                    <table id="export"  class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Transaction Code</th>
+                          <th>Account No.</th>
+                          <th>Amount</th>
+                          <th>Acc. Owner</th>
+                          <th>Timestamp</th>
+
+                        </tr>
+                      </thead>
+                      <tbody>
 
                         <?php
-                    //Get latest deposits transactions 
-                    $ret = "SELECT * FROM  ib_transactions  WHERE tr_type = 'Withdrawal' ";
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
-                    $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-                      /* Trim Transaction Timestamp to 
+                        //Get latest deposits transactions 
+                        $ret = "SELECT * FROM  ib_transactions  WHERE tr_type = 'Withdrawal' ";
+                        $stmt = $mysqli->prepare($ret);
+                        $stmt->execute(); //ok
+                        $res = $stmt->get_result();
+                        $cnt = 1;
+                        while ($row = $res->fetch_object()) {
+                          /* Trim Transaction Timestamp to 
                             *  User Uderstandable Formart  DD-MM-YYYY :
                             */
-                      $transTstamp = $row->created_at;
-                      //Perfom some lil magic here
-                      if ($row->tr_type == 'Deposit') {
-                        $alertClass = "<span class='badge badge-success'>$row->tr_type</span>";
-                      } elseif ($row->tr_type == 'Withdrawal') {
-                        $alertClass = "<span class='badge badge-danger'>$row->tr_type</span>";
-                      } else {
-                        $alertClass = "<span class='badge badge-warning'>$row->tr_type</span>";
-                      }
-                    ?>
+                          $transTstamp = $row->created_at;
+                          //Perfom some lil magic here
+                          if ($row->tr_type == 'Deposit') {
+                            $alertClass = "<span class='badge badge-success'>$row->tr_type</span>";
+                          } elseif ($row->tr_type == 'Withdrawal') {
+                            $alertClass = "<span class='badge badge-danger'>$row->tr_type</span>";
+                          } else {
+                            $alertClass = "<span class='badge badge-warning'>$row->tr_type</span>";
+                          }
+                        ?>
 
                           <tr class="border-transparent">
-                          <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->tr_code; ?></a></td>
-                        <td><?php echo $row->account_number; ?></td>
-                        <td>$ <?php echo $row->transaction_amt; ?></td>
-                        <td><?php echo $row->client_name; ?></td>
-                        <td><?php echo date("d-M-Y h:m:s ", strtotime($transTstamp)); ?></td>
-                      </tr>
-                    <?php $cnt = $cnt + 1;
-                    } ?>
+                            <td><?php echo $cnt; ?></td>
+                            <td><?php echo $row->tr_code; ?></a></td>
+                            <td><?php echo $row->account_number; ?></td>
+                            <td>$ <?php echo $row->transaction_amt; ?></td>
+                            <td><?php echo $row->client_name; ?></td>
+                            <td><?php echo date("d-M-Y h:m:s ", strtotime($transTstamp)); ?></td>
+                          </tr>
+                        <?php $cnt = $cnt + 1;
+                        } ?>
 
-                        </tbody>
-                      </table>
-                    </div>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <!--/ Data Tables -->
               </div>
+              <!--/ Data Tables -->
             </div>
-            <!-- / Content -->
-
-            <div class="content-backdrop fade"></div>
           </div>
-          <!-- Content wrapper -->
+          <!-- / Content -->
+
+          <div class="content-backdrop fade"></div>
         </div>
-        <!-- / Layout page -->
+        <!-- Content wrapper -->
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+      <!-- / Layout page -->
     </div>
-    <!-- / Layout wrapper -->
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
 
-    <!-- endbuild -->
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="../assets/vendor/js/bootstrap.js"></script>
+  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
 
-    <!-- Vendors JS -->
-    <script src="../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+  <!-- endbuild -->
 
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
+  <!-- Vendors JS -->
+  <script src="../assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
-    <!-- Page JS -->
-    <script src="../assets/js/dashboards-analytics.js"></script>
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
 
-    <!-- Place this tag before closing body tag for github widget button. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
+  <!-- DataTables -->
+  <script src="../assets/datatables/jquery.dataTables.js"></script>
+  <script src="../assets/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+  
+  <!-- AdminLTE App -->
+
+  <!-- Page JS -->
+  <script src="../assets/js/dashboards-analytics.js"></script>
+
+  <!-- Place this tag before closing body tag for github widget button. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  <!-- page script -->
+  <script>
+    $(function() {
+      $("#example1").DataTable();
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+      });
+    });
+  </script>
+  <!-- Data Tables V2.01 -->
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="../assets/datatable/button-ext/dataTables.buttons.min.js"></script>
+  <script src="../assets/datatable/button-ext/jszip.min.js"></script>
+  <script src="../assets/datatable/button-ext/buttons.html5.min.js"></script>
+  <script src="../assets/datatable/button-ext/buttons.print.min.js"></script>
+  <script>
+    $('#export').DataTable({
+      dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
+      buttons: {
+        buttons: [{
+            extend: 'excel',
+            className: 'btn'
+          },
+          {
+            extend: 'print',
+            className: 'btn'
+          }
+        ]
+      },
+      "oLanguage": {
+        "oPaginate": {
+          "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
+          "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>'
+        },
+        "sInfo": "Showing page _PAGE_ of _PAGES_",
+        "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+        "sSearchPlaceholder": "Search...",
+        "sLengthMenu": "Results :  _MENU_",
+      },
+      "stripeClasses": [],
+      "lengthMenu": [7, 10, 20, 50],
+      "pageLength": 7
+    });
+  </script>
+</body>
+
 </html>

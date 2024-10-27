@@ -7,7 +7,7 @@
     <meta name="description" content="Cheapy SACCO - Building Financial Freedom Together" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="assets/svg/icon.svg" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,9 +21,9 @@
     <style>
       /* Colors */
       :root {
-        --primary-color: #6a0dad;
+        --primary-color: #8c57ff;
         --secondary-color: #4b0082;
-        --light-color: #f5f5f5;
+        --light-color:#8c57ff;
         --dark-color: #343a40;
         --text-light: #ffffff;
       }

@@ -18,7 +18,7 @@ while ($sys = $res->fetch_object()) {
 <meta name="description" content="" />
 
 <!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+<link rel="icon" type="image/x-icon" href="../assets/svg/icon.svg" />
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,9 +29,12 @@ while ($sys = $res->fetch_object()) {
 
 <link rel="stylesheet" href="../assets/vendor/fonts/remixicon/remixicon.css" />
 
+<!--Data tables css-->
+<link rel="stylesheet" href="../assets/datatables-bs4/css/dataTables.bootstrap4.css">
+
+
 <!-- Menu waves for no-customizer fix -->
 <link rel="stylesheet" href="../assets/vendor/libs/node-waves/node-waves.css" />
-
 <!-- Core CSS -->
 <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
 <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
