@@ -4,39 +4,57 @@ include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-//update logged in user account
+$err = $success = "";
+
+// Update account details
 if (isset($_POST['update_account'])) {
-  $name = $_POST['name'];
-  $admin_id = $_SESSION['admin_id'];
-  $email = $_POST['email'];
-  //insert unto certain table in database
-  $query = "UPDATE ib_admin  SET name=?, email=? WHERE  admin_id=?";
+  $name = htmlspecialchars($_POST['name']);
+  $email = htmlspecialchars($_POST['email']);
+
+  $query = "UPDATE ib_admin SET name=?, email=? WHERE admin_id=?";
   $stmt = $mysqli->prepare($query);
-  //bind paramaters
-  $rc = $stmt->bind_param('ssi', $name, $email, $admin_id);
-  $stmt->execute();
-  //declare a varible which will be passed to alert function
-  if ($stmt) {
-    $success = "Account Updated";
+  $stmt->bind_param('ssi', $name, $email, $admin_id);
+
+  if ($stmt->execute()) {
+    if ($stmt->affected_rows > 0) {
+      $success = "Account Updated";
+    } else {
+      $err = "No changes made";
+    }
   } else {
-    $err = "Please Try Again Or Try Later";
+    $err = "An error occurred. Please try again.";
   }
+  $stmt->close();
 }
-//change password
+
+// Change password
 if (isset($_POST['change_password'])) {
-  $password = sha1(md5($_POST['password']));
-  $admin_id = $_SESSION['admin_id'];
-  //insert unto certain table in database
-  $query = "UPDATE ib_admin  SET password=? WHERE  admin_id=?";
+  $old_password = sha1(md5($_POST['old_password']));
+  $new_password = sha1(md5($_POST['new_password']));
+  $confirm_password = sha1(md5($_POST['confirm_password']));
+
+  $query = "SELECT password FROM ib_admin WHERE admin_id=?";
   $stmt = $mysqli->prepare($query);
-  //bind paramaters
-  $rc = $stmt->bind_param('si', $password, $admin_id);
+  $stmt->bind_param('i', $admin_id);
   $stmt->execute();
-  //declare a varible which will be passed to alert function
-  if ($stmt) {
-    $success = "Password Updated";
+  $stmt->bind_result($current_password);
+  $stmt->fetch();
+  $stmt->close();
+
+  if ($current_password !== $old_password) {
+    $err = "Old password does not match.";
+  } elseif ($new_password !== $confirm_password) {
+    $err = "New password and confirmation do not match.";
   } else {
-    $err = "Please Try Again Or Try Later";
+    $query = "UPDATE ib_admin SET password=? WHERE admin_id=?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param('si', $new_password, $admin_id);
+    if ($stmt->execute()) {
+      $success = "Password Updated Successfully";
+    } else {
+      $err = "Failed to update password. Try again later.";
+    }
+    $stmt->close();
   }
 }
 ?>
@@ -87,34 +105,28 @@ if (isset($_POST['change_password'])) {
         <!-- Content wrapper -->
         <div class="content-wrapper">
 
+          <?php if ($err): ?>
+            <div class="alert alert-danger" role="alert">
+              <?php echo $err; ?>
+            </div>
+          <?php elseif ($success): ?>
+            <div class="alert alert-success" role="alert">
+              <?php echo $success; ?>
+            </div>
+          <?php endif; ?>
+
           <?php
-          $admin_id = $_SESSION['admin_id'];
-          $ret = "SELECT * FROM  ib_admin  WHERE admin_id = ? ";
+          $ret = "SELECT * FROM ib_admin WHERE admin_id = ?";
           $stmt = $mysqli->prepare($ret);
           $stmt->bind_param('i', $admin_id);
-          $stmt->execute(); //ok
+          $stmt->execute();
           $res = $stmt->get_result();
           while ($row = $res->fetch_object()) {
-            //set automatically logged in user default image if they have not updated their pics
-            if ($row->profile_pic == '') {
-              $profile_picture = "
-
-                        <img class='img-fluid'
-                        src='../dist/img/user_icon.png'
-                        alt='User profile picture'>
-
-                        ";
-            } else {
-              $profile_picture = "
-
-                        <img class=' img-fluid'
-                        src='../dist/img/$row->profile_pic'
-                        alt='User profile picture'>
-
-                        ";
-            }
-
+            $profile_picture = $row->profile_pic
+              ? "<img class='img-fluid' src='../assets/img/$row->profile_pic' alt='User profile picture'>"
+              : "<img class='img-fluid' src='../assets/img/user_icon.png' alt='User profile picture'>";
           ?>
+
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
@@ -210,32 +222,32 @@ if (isset($_POST['change_password'])) {
                               <div class="form-floating form-floating-outline">
                                 <input
                                   class="form-control"
-                                  type="password"
-                                  id="inputPassword"
-                                  name="inputPassword"
+                                  type="password" name="old_password" placeholder="Old Password"
+                                  required
                                   autofocus />
                                 <label for="inputPassword">Old Password</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="form-floating form-floating-outline">
-                                <input class="form-control" type="password" name="inputPassword" id="lastName" />
+                                <input class="form-control"  type="password" name="new_password" placeholder="New Password" 
+                                autofocus
+                                required />
                                 <label for="inputPassword">New Password</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="form-floating form-floating-outline">
                                 <input
-                                  type="password"
                                   class="form-control"
-                                  id="inputPassword"
-                                  name="inputPassword" />
+                                  itype="password" name="confirm_password" placeholder="Confirm New Password" required
+                                  autofocus/>
                                 <label for="inputPassword">Confirm New Password</label>
                               </div>
                             </div>
                           </div>
                           <div class="mt-6">
-                            <button type="submit" class="btn btn-primary me-3">Change Password</button>
+                            <button name="change_password" type="submit" class="btn btn-primary me-3">Change Password</button>
                           </div>
                         </form>
                       </div>
@@ -259,27 +271,9 @@ if (isset($_POST['change_password'])) {
     <!-- / Layout wrapper -->
 
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
+        <!-- script -->
+        <?php include 'components/script.php'; ?>
 
-    <!-- endbuild -->
-
-    <!-- Vendors JS -->
-
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
-
-    <!-- Page JS -->
-    <script src="../assets/js/pages-account-settings-account.js"></script>
-
-    <!-- Place this tag before closing body tag for github widget button. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

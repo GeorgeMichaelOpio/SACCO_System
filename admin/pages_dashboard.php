@@ -3,135 +3,57 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
+
 $admin_id = $_SESSION['admin_id'];
 
-//clear notifications and alert user that they are cleared
+// Clear notifications
 if (isset($_GET['Clear_Notifications'])) {
   $id = intval($_GET['Clear_Notifications']);
-  $adn = "DELETE FROM  ib_notifications  WHERE notification_id = ?";
-  $stmt = $mysqli->prepare($adn);
+  $stmt = $mysqli->prepare("DELETE FROM ib_notifications WHERE notification_id = ?");
   $stmt->bind_param('i', $id);
   $stmt->execute();
   $stmt->close();
 
-  if ($stmt) {
-    $info = "Notifications Cleared";
-  } else {
-    $err = "Try Again Later";
+  $info = $stmt ? "Notifications Cleared" : "Try Again Later";
+}
+
+// Dashboard Analytics Queries
+$queries = [
+  'iBClients' => "SELECT count(*) FROM ib_clients",
+  'iBStaffs' => "SELECT count(*) FROM ib_staff",
+  'iB_AccsType' => "SELECT count(*) FROM ib_acc_types",
+  'iB_Accs' => "SELECT count(*) FROM ib_bankaccounts",
+  'iB_deposits' => "SELECT SUM(transaction_amt) FROM ib_transactions WHERE tr_type = 'Deposit'",
+  'iB_withdrawal' => "SELECT SUM(transaction_amt) FROM ib_transactions WHERE tr_type = 'Withdrawal'",
+  'iB_Transfers' => "SELECT SUM(transaction_amt) FROM ib_transactions WHERE tr_type = 'Transfer'",
+];
+
+foreach ($queries as $key => $query) {
+  $stmt = $mysqli->prepare($query);
+  $stmt->execute();
+  $stmt->bind_result($$key);
+  $stmt->fetch();
+  $stmt->close();
+}
+
+$TotalBalInAccount = $iB_deposits - ($iB_withdrawal + $iB_Transfers);
+
+// Fetch account types and transactions for charts
+function fetchDataForChart($query, $mysqli)
+{
+  $stmt = $mysqli->prepare($query);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  $data = [];
+  while ($row = $result->fetch_assoc()) {
+    $data[] = $row;
   }
-}
-/*
-    get all dashboard analytics 
-    and numeric values from distinct 
-    tables
-    */
-
-//return total number of ibank clients
-$result = "SELECT count(*) FROM ib_clients";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iBClients);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of iBank Staffs
-$result = "SELECT count(*) FROM ib_staff";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iBStaffs);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of iBank Account Types
-$result = "SELECT count(*) FROM ib_acc_types";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iB_AccsType);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of iBank Accounts
-$result = "SELECT count(*) FROM ib_bankaccounts";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iB_Accs);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of iBank Deposits
-$result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  tr_type = 'Deposit' ";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iB_deposits);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of iBank Withdrawals
-$result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  tr_type = 'Withdrawal' ";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iB_withdrawal);
-$stmt->fetch();
-$stmt->close();
-
-
-
-//return total number of iBank Transfers
-$result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  tr_type = 'Transfer' ";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($iB_Transfers);
-$stmt->fetch();
-$stmt->close();
-
-//return total number of  iBank initial cash->balances
-$result = "SELECT SUM(transaction_amt) FROM ib_transactions ";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($acc_amt);
-$stmt->fetch();
-$stmt->close();
-//Get the remaining money in the accounts
-$TotalBalInAccount = ($iB_deposits)  - (($iB_withdrawal) + ($iB_Transfers));
-
-
-//ibank money in the wallet
-$result = "SELECT SUM(transaction_amt) FROM ib_transactions ";
-$stmt = $mysqli->prepare($result);
-$stmt->execute();
-$stmt->bind_result($new_amt);
-$stmt->fetch();
-$stmt->close();
-
-// Fetch account types
-$accTypesQuery = "SELECT acc_type, COUNT(*) AS count FROM ib_bankaccounts GROUP BY acc_type";
-$accTypesStmt = $mysqli->prepare($accTypesQuery);
-$accTypesStmt->execute();
-$accTypesResult = $accTypesStmt->get_result();
-
-$accountTypes = [];
-$accountCounts = [];
-
-while ($row = $accTypesResult->fetch_assoc()) {
-  $accountTypes[] = $row['acc_type'];
-  $accountCounts[] = $row['count'];
+  $stmt->close();
+  return $data;
 }
 
-// Fetch transactions
-$transactionsQuery = "SELECT tr_type, SUM(transaction_amt) AS total FROM ib_transactions GROUP BY tr_type";
-$transactionsStmt = $mysqli->prepare($transactionsQuery);
-$transactionsStmt->execute();
-$transactionsResult = $transactionsStmt->get_result();
-
-$transactionTypes = [];
-$transactionTotals = [];
-
-while ($row = $transactionsResult->fetch_assoc()) {
-  $transactionTypes[] = $row['tr_type'];
-  $transactionTotals[] = $row['total'];
-}
-
-
+$accountTypesData = fetchDataForChart("SELECT acc_type, COUNT(*) AS count FROM ib_bankaccounts GROUP BY acc_type", $mysqli);
+$transactionsData = fetchDataForChart("SELECT tr_type, SUM(transaction_amt) AS total FROM ib_transactions GROUP BY tr_type", $mysqli);
 ?>
 
 <!doctype html>
@@ -385,7 +307,7 @@ while ($row = $transactionsResult->fetch_assoc()) {
 
                         <?php
                         //Get latest transactions 
-                        $ret = "SELECT * FROM `ib_transactions` ORDER BY `ib_transactions`.`created_at` DESC ";
+                        $ret = "SELECT * FROM `ib_transactions` ORDER BY `created_at` DESC LIMIT 5";
                         $stmt = $mysqli->prepare($ret);
                         $stmt->execute(); //ok
                         $res = $stmt->get_result();
@@ -441,75 +363,33 @@ while ($row = $transactionsResult->fetch_assoc()) {
   </div>
   <!-- / Layout wrapper -->
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="../assets/vendor/libs/popper/popper.js"></script>
-  <script src="../assets/vendor/js/bootstrap.js"></script>
-  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="../assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-  <script src="../assets/vendor/libs/apex-charts/apexcharts.js"></script>
-
-  <!-- Main JS -->
-  <script src="../assets/js/main.js"></script>
-
-  <!-- Page JS -->
-  <script src="../assets/js/dashboards-analytics.js"></script>
-
-  <!-- Place this tag before closing body tag for github widget button. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- script -->
+  <?php include 'components/script.php'; ?>
 
   <script>
-    // Account Types Chart
-    var accountTypes = <?php echo json_encode($accountTypes); ?>;
-    var accountCounts = <?php echo json_encode($accountCounts); ?>;
+    const accountData = <?php echo json_encode($accountTypesData); ?>;
+    const transactionData = <?php echo json_encode($transactionsData); ?>;
 
-    var options1 = {
+    new ApexCharts(document.querySelector("#accountTypesChart"), {
       chart: {
-        type: 'pie',
+        type: 'pie'
       },
-      series: accountCounts,
-      labels: accountTypes,
-      responsive: [{
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 300
-          },
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }]
-    };
+      series: accountData.map(data => data.count),
+      labels: accountData.map(data => data.acc_type),
+    }).render();
 
-    var chart1 = new ApexCharts(document.querySelector("#accountTypesChart"), options1);
-    chart1.render();
-
-    // Transactions Chart
-    var transactionTypes = <?php echo json_encode($transactionTypes); ?>;
-    var transactionTotals = <?php echo json_encode($transactionTotals); ?>;
-
-    var options2 = {
+    new ApexCharts(document.querySelector("#transactionsChart"), {
       chart: {
-        type: 'bar',
+        type: 'bar'
       },
       series: [{
         name: 'Transaction Amount',
-        data: transactionTotals
+        data: transactionData.map(data => data.total)
       }],
       xaxis: {
-        categories: transactionTypes
-      }
-    };
-
-    var chart2 = new ApexCharts(document.querySelector("#transactionsChart"), options2);
-    chart2.render();
+        categories: transactionData.map(data => data.tr_type)
+      },
+    }).render();
   </script>
 
 </body>

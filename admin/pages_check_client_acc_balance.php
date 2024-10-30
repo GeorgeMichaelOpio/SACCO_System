@@ -33,13 +33,10 @@ $admin_id = $_SESSION['admin_id'];
                 <!-- App Brand -->
                 <?php include 'components/app_brand.php'; ?>
 
-
                 <div class="menu-inner-shadow"></div>
 
                 <!-- SideBar -->
                 <?php include 'components/side_bar.php'; ?>
-
-
 
             </aside>
             <!-- / Menu -->
@@ -52,18 +49,11 @@ $admin_id = $_SESSION['admin_id'];
 
                 <!-- Content Wrapper. Contains page content -->
                 <?php
-                /*  Im About to do something stupid buh lets do it
-         *  get the sumof all deposits(Money In) then get the sum of all
-         *  Transfers and Withdrawals (Money Out).
-         * Then To Calculate Balance and rate,
-         * Take the rate, compute it and then add with the money in account and 
-         * Deduce the Money out
-         *
-         */
-
-                //get the total amount deposited
+                // Get the account ID from the URL
                 $account_id = $_GET['account_id'];
-                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  account_id = ? AND  tr_type = 'Deposit' ";
+
+                // Get the total amount deposited
+                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE account_id = ? AND tr_type = 'Deposit'";
                 $stmt = $mysqli->prepare($result);
                 $stmt->bind_param('i', $account_id);
                 $stmt->execute();
@@ -71,9 +61,8 @@ $admin_id = $_SESSION['admin_id'];
                 $stmt->fetch();
                 $stmt->close();
 
-                //get total amount withdrawn
-                $account_id = $_GET['account_id'];
-                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  account_id = ? AND  tr_type = 'Withdrawal' ";
+                // Get total amount withdrawn
+                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE account_id = ? AND tr_type = 'Withdrawal'";
                 $stmt = $mysqli->prepare($result);
                 $stmt->bind_param('i', $account_id);
                 $stmt->execute();
@@ -81,37 +70,46 @@ $admin_id = $_SESSION['admin_id'];
                 $stmt->fetch();
                 $stmt->close();
 
-                //get total amount transfered
-                $account_id = $_GET['account_id'];
-                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE  account_id = ? AND  tr_type = 'Transfer' ";
+                // Get total amount transferred
+                $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE account_id = ? AND tr_type = 'Transfer'";
                 $stmt = $mysqli->prepare($result);
                 $stmt->bind_param('i', $account_id);
                 $stmt->execute();
-                $stmt->bind_result($Transfer);
+                $stmt->bind_result($transfer);
                 $stmt->fetch();
                 $stmt->close();
 
-
-
-                $account_id = $_GET['account_id'];
-                $ret = "SELECT * FROM  ib_bankaccounts WHERE account_id =? ";
+                // Get account details
+                $ret = "SELECT * FROM ib_bankaccounts WHERE account_id = ?";
                 $stmt = $mysqli->prepare($ret);
                 $stmt->bind_param('i', $account_id);
-                $stmt->execute(); //ok
+                $stmt->execute();
                 $res = $stmt->get_result();
                 $cnt = 1;
+
                 while ($row = $res->fetch_object()) {
-                    //compute rate
+                    // Compute rate
                     $banking_rate = ($row->acc_rates) / 100;
-                    //compute Money out
-                    $money_out = $withdrawal + $Transfer;
-                    //compute the balance
+                    // Compute Money out
+                    $money_out = $withdrawal + $transfer;
+                    // Compute the balance
                     $money_in = $deposit - $money_out;
-                    //get the rate
+                    // Get the rate
                     $rate_amt = $banking_rate * $money_in;
-                    //compute the intrest + balance 
+                    // Compute interest + balance
                     $totalMoney = $rate_amt + $money_in;
 
+                    // Get approved loans
+                    $loan_result = "SELECT SUM(ln_amount) FROM ib_loans WHERE account_id = ? AND ln_status = 'Approved'";
+                    $loan_stmt = $mysqli->prepare($loan_result);
+                    $loan_stmt->bind_param('i', $account_id);
+                    $loan_stmt->execute();
+                    $loan_stmt->bind_result($total_loans);
+                    $loan_stmt->fetch();
+                    $loan_stmt->close();
+
+                    // Compute net total balance
+                    $net_total_balance = $totalMoney - ($total_loans ? $total_loans : 0); // Adjust the total balance by deducting loans
                 ?>
                     <div class="content-wrapper">
                         <div class="container-xxl flex-grow-1 container-p-y">
@@ -123,17 +121,16 @@ $admin_id = $_SESSION['admin_id'];
                                             <div class="col-12">
                                                 <!-- Main content -->
                                                 <div id="balanceSheet" class="invoice p-3 mb-3">
-                                                    <!-- title row -->
+                                                    <!-- Title row -->
                                                     <div class="row">
                                                         <div class="col-12">
                                                             <h4>
-                                                                <i class="fas fa-bank"></i> iBanking Corporation Balance Enquiry
+                                                                <i class="fas fa-bank"></i> Cheapy Corporation Balance Enquiry
                                                                 <small class="float-right">Date: <?php echo date('d/m/Y'); ?></small>
                                                             </h4>
                                                         </div>
-                                                        <!-- /.col -->
                                                     </div>
-                                                    <!-- info row -->
+                                                    <!-- Info row -->
                                                     <div class="row invoice-info">
                                                         <div class="col-sm-6 invoice-col">
                                                             Account Holder
@@ -145,7 +142,6 @@ $admin_id = $_SESSION['admin_id'];
                                                                 ID No: <?php echo $row->client_national_id; ?>
                                                             </address>
                                                         </div>
-                                                        <!-- /.col -->
                                                         <div class="col-sm-6 invoice-col">
                                                             Account Details
                                                             <address>
@@ -155,9 +151,7 @@ $admin_id = $_SESSION['admin_id'];
                                                                 Acc Rates: <?php echo $row->acc_rates; ?> %
                                                             </address>
                                                         </div>
-
                                                     </div>
-                                                    <!-- /.row -->
 
                                                     <!-- Table row -->
                                                     <div class="row">
@@ -172,67 +166,56 @@ $admin_id = $_SESSION['admin_id'];
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-
                                                                     <tr>
-                                                                        <td>$ <?php echo $deposit; ?></td>
-                                                                        <td>$ <?php echo $withdrawal; ?></td>
-                                                                        <td>$ <?php echo $Transfer; ?></td>
-                                                                        <td>$ <?php echo $money_in; ?></td>
+                                                                        <td>$ <?php echo number_format($deposit, 2); ?></td>
+                                                                        <td>$ <?php echo number_format($withdrawal, 2); ?></td>
+                                                                        <td>$ <?php echo number_format($transfer, 2); ?></td>
+                                                                        <td>$ <?php echo number_format($money_in, 2); ?></td>
                                                                     </tr>
-
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                        <!-- /.col -->
                                                     </div>
-                                                    <!-- /.row -->
 
                                                     <div class="row">
-                                                        <!-- accepted payments column -->
                                                         <div class="col-6">
                                                             <p class="lead"></p>
-
-                                                            <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-
-                                                            </p>
                                                         </div>
-                                                        <!-- /.col -->
                                                         <div class="col-6">
-                                                            <p class="lead">Balance Checked On : <?php echo date('d-M-Y'); ?></p>
-
+                                                            <p class="lead">Balance Checked On: <?php echo date('d-M-Y'); ?></p>
                                                             <div class="table-responsive">
                                                                 <table class="table table-bordered table-hover">
                                                                     <tr>
                                                                         <th style="width:50%">Funds In:</th>
-                                                                        <td>$ <?php echo $deposit; ?></td>
+                                                                        <td>$ <?php echo number_format($deposit, 2); ?></td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <th>Funds Out</th>
-                                                                        <td>$ <?php echo $money_out; ?></td>
+                                                                        <th>Funds Out:</th>
+                                                                        <td>$ <?php echo number_format($money_out, 2); ?></td>
                                                                     </tr>
                                                                     <tr>
                                                                         <th>Sub Total:</th>
-                                                                        <td>$ <?php echo $money_in; ?></td>
+                                                                        <td>$ <?php echo number_format($money_in, 2); ?></td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <th>Banking Intrest:</th>
-                                                                        <td>$ <?php echo $rate_amt; ?></td>
+                                                                        <th>Banking Interest:</th>
+                                                                        <td>$ <?php echo number_format($rate_amt, 2); ?></td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <th>Total Balance:</th>
-                                                                        <td>$ <?php echo $totalMoney; ?></td>
+                                                                        <th>Total Loans:</th>
+                                                                        <td>$ <?php echo $total_loans ? number_format($total_loans, 2) : '0.00'; ?></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Net Total Balance:</th>
+                                                                        <td>$ <?php echo number_format($net_total_balance, 2); ?></td>
                                                                     </tr>
                                                                 </table>
                                                             </div>
                                                         </div>
-                                                        <!-- /.col -->
                                                     </div>
-                                                    <!-- /.row -->
 
-                                                    <!-- this row will not appear when printing -->
                                                     <div class="row no-print">
                                                         <div class="col-12">
-
                                                             <button type="button" id="print" onclick="printContent('balanceSheet');" class="btn btn-primary float-right" style="margin-right: 5px;">
                                                                 <i class="fas fa-print"></i> Print
                                                             </button>
@@ -243,11 +226,8 @@ $admin_id = $_SESSION['admin_id'];
                                             </div><!-- /.col -->
                                         </div><!-- /.row -->
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
                     </div>
                 <?php } ?>
@@ -261,30 +241,8 @@ $admin_id = $_SESSION['admin_id'];
             </div>
             <!-- ./wrapper -->
 
-            <!-- Core JS -->
-            <!-- build:js assets/vendor/js/core.js -->
-            <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-            <script src="../assets/vendor/libs/popper/popper.js"></script>
-            <script src="../assets/vendor/js/bootstrap.js"></script>
-            <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-            <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-            <script src="../assets/vendor/js/menu.js"></script>
-
-            <!-- endbuild -->
-
-            <!-- Vendors JS -->
-
-            <!-- Main JS -->
-            <script src="../assets/js/main.js"></script>
-
-            <!-- Page JS -->
-
-            <!-- Place this tag before closing body tag for github widget button. -->
-            <script async defer src="https://buttons.github.io/buttons.js"></script>
-
-            <!-- DateTables -->
-            <script src="../assets/datatables/jquery.dataTables.js"></script>
-            <script src="../assets/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+            <!-- script -->
+            <?php include 'components/script.php'; ?>
 
             <!-- page script -->
             <script>
@@ -299,15 +257,15 @@ $admin_id = $_SESSION['admin_id'];
                         "autoWidth": false,
                     });
                 });
-            </script>
-            <script>
-                //print balance sheet
-                function printContent(el) {
-                    var restorepage = $('body').html();
-                    var printcontent = $('#' + el).clone();
-                    $('body').empty().html(printcontent);
+
+                // Print function
+                function printContent(divName) {
+                    var printContents = document.getElementById(divName).innerHTML;
+                    var originalContents = document.body.innerHTML;
+
+                    document.body.innerHTML = printContents;
                     window.print();
-                    $('body').html(restorepage);
+                    document.body.innerHTML = originalContents;
                 }
             </script>
 </body>

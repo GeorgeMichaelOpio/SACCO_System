@@ -122,7 +122,7 @@ if (isset($_POST['create_staff_account'])) {
                             class="form-control"
                             id="inputStaffNumber"
                             name="staff_number" readonly
-                            value="iBank-STAFF-<?php echo $_staffNumber; ?>" />
+                            value="Cheapy-STAFF-<?php echo $_staffNumber; ?>" />
                           <label for="inputStaffNumber">Staff Number</label>
                         </div>
                       </div>
@@ -195,27 +195,9 @@ if (isset($_POST['create_staff_account'])) {
   <!-- / Layout wrapper -->
 
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="../assets/vendor/libs/popper/popper.js"></script>
-  <script src="../assets/vendor/js/bootstrap.js"></script>
-  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="../assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-
-  <!-- Main JS -->
-  <script src="../assets/js/main.js"></script>
-
-  <!-- Page JS -->
-  <script src="../assets/js/pages-account-settings-account.js"></script>
-
-  <!-- Place this tag before closing body tag for github widget button. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
+ <!-- script -->
+ <?php include 'components/script.php'; ?>
+ 
 </body>
 
 </html>

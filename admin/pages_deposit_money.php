@@ -1,10 +1,26 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
+// Load PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../assets/vendor/phpmailer/src/Exception.php';
+require '../assets/vendor/phpmailer/src/PHPMailer.php';
+require '../assets/vendor/phpmailer/src/SMTP.php';
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-//register new account
 
 if (isset($_POST['deposit'])) {
     $tr_code = $_POST['tr_code'];
@@ -12,7 +28,6 @@ if (isset($_POST['deposit'])) {
     $acc_name = $_POST['acc_name'];
     $account_number = $_GET['account_number'];
     $acc_type = $_POST['acc_type'];
-    //$acc_amount  = $_POST['acc_amount'];
     $tr_type  = $_POST['tr_type'];
     $tr_status = $_POST['tr_status'];
     $client_id  = $_GET['client_id'];
@@ -20,58 +35,61 @@ if (isset($_POST['deposit'])) {
     $client_national_id  = $_POST['client_national_id'];
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
-    //$acc_new_amt = $_POST['acc_new_amt'];
 
-    //Notication
-    $notification_details = "$client_name Has Deposited $ $transaction_amt To Bank Account $account_number";
+    // Notification
+    $notification_details = "$client_name has deposited $$transaction_amt to bank account $account_number";
 
-
-    //Insert Captured information to a database table
-    $query = "INSERT INTO ib_transactions (tr_code, account_id, acc_name, account_number, acc_type,  tr_type, tr_status, client_id, client_name, client_national_id, transaction_amt, client_phone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-    $notification = "INSERT INTO  ib_notifications (notification_details) VALUES (?)";
+    // Insert transaction details into database
+    $query = "INSERT INTO ib_transactions (tr_code, account_id, acc_name, account_number, acc_type, tr_type, tr_status, client_id, client_name, client_national_id, transaction_amt, client_phone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+    $notification = "INSERT INTO ib_notifications (notification_details) VALUES (?)";
 
     $stmt = $mysqli->prepare($query);
     $notification_stmt = $mysqli->prepare($notification);
 
-    //bind paramaters
     $rc = $notification_stmt->bind_param('s', $notification_details);
     $rc = $stmt->bind_param('ssssssssssss', $tr_code, $account_id, $acc_name, $account_number, $acc_type, $tr_type, $tr_status, $client_id, $client_name, $client_national_id, $transaction_amt, $client_phone);
     $stmt->execute();
     $notification_stmt->execute();
 
-
-    //declare a varible which will be passed to alert function
+    // Send confirmation email
     if ($stmt && $notification_stmt) {
-        $success = "Money Deposited";
+        $mail = new PHPMailer(true);
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'georgemichaelopio@gmail.com'; // Gmail username
+            $mail->Password = 'password'; // Gmail app-specific password
+            $mail->SMTPSecure = 'ssl';
+            $mail->Port = 465;
+
+            // Recipients
+            $mail->setFrom('georgemichaelopio@gmail.com', 'Cheapy');
+            $mail->addAddress('0abc0xyz@proton.me'); // Use client's email
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Transaction Confirmation';
+            $mail->Body = "
+                <h3>Transaction Successful</h3>
+                <p>Dear $client_name,</p>
+                <p>Your deposit of $$transaction_amt to account number $account_number has been successfully processed.</p>
+                <p>Transaction Code: $tr_code</p>
+                <p>Thank you for banking with us!</p>
+            ";
+
+            $mail->send();
+            $success = "Money Deposited and Email Sent";
+        } catch (Exception $e) {
+            $err = "Money Deposited but email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
     } else {
         $err = "Please Try Again Or Try Later";
     }
 }
-/*
-    if(isset($_POST['deposit']))
-    {
-       $account_id = $_GET['account_id'];
-       $acc_amount = $_POST['acc_amount'];
-        
-        //Insert Captured information to a database table
-        $query="UPDATE  ib_bankaccounts SET acc_amount=? WHERE account_id=?";
-        $stmt = $mysqli->prepare($query);
-        //bind paramaters
-        $rc=$stmt->bind_param('si', $acc_amount, $account_id);
-        $stmt->execute();
-
-        //declare a varible which will be passed to alert function
-        if($stmt )
-        {
-            $success = "Money Deposited";
-        }
-        else
-        {
-            $err = "Please Try Again Or Try Later";
-        }   
-    }   
-    */
 ?>
+
 
 <!doctype html>
 
@@ -117,6 +135,11 @@ if (isset($_POST['deposit'])) {
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
+                    <?php if (isset($success)): ?>
+                        <div class="alert alert-success mt-3"><?php echo $success; ?></div>
+                    <?php elseif (isset($err)): ?>
+                        <div class="alert alert-danger mt-3"><?php echo $err; ?></div>
+                    <?php endif; ?>
                     <!-- Content -->
 
                     <?php
@@ -186,7 +209,7 @@ if (isset($_POST['deposit'])) {
                                                             $length = 20;
                                                             $_transcode =  substr(str_shuffle('0123456789QWERgfdsazxcvbnTYUIOqwertyuioplkjhmPASDFGHJKLMNBVCXZ'), 1, $length);
                                                             ?>
-                                                            <input type="text" readonly name="client_number" value="<?php echo $_transcode; ?>" class="form-control" id="Transaction_Code">
+                                                            <input type="text" readonly name="tr_code" value="<?php echo $_transcode; ?>" class="form-control" id="Transaction_Code">
                                                             <label for="Transaction_Code">Transaction Code</label>
                                                         </div>
                                                     </div>
@@ -231,27 +254,9 @@ if (isset($_POST['deposit'])) {
         </div>
         <!-- / Layout wrapper -->
 
+        <!-- script -->
+        <?php include 'components/script.php'; ?>
 
-        <!-- Core JS -->
-        <!-- build:js assets/vendor/js/core.js -->
-        <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="../assets/vendor/libs/popper/popper.js"></script>
-        <script src="../assets/vendor/js/bootstrap.js"></script>
-        <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-        <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="../assets/vendor/js/menu.js"></script>
-
-        <!-- endbuild -->
-
-        <!-- Vendors JS -->
-
-        <!-- Main JS -->
-        <script src="../assets/js/main.js"></script>
-
-        <!-- Page JS -->
-
-        <!-- Place this tag before closing body tag for github widget button. -->
-        <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

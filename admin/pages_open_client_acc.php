@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
@@ -30,7 +33,7 @@ if (isset($_POST['open_account'])) {
 
 	//declare a varible which will be passed to alert function
 	if ($stmt) {
-		$success = "iBank Account Opened";
+		$success = "Account Opened";
 	} else {
 		$err = "Please Try Again Or Try Later";
 	}
@@ -82,6 +85,12 @@ if (isset($_POST['open_account'])) {
 
 				<!-- Content wrapper -->
 				<div class="content-wrapper">
+					<!-- Alert messages -->
+					<?php if (isset($success)): ?>
+						<div class="alert alert-success mt-3"><?php echo $success; ?></div>
+					<?php elseif (isset($err)): ?>
+						<div class="alert alert-danger mt-3"><?php echo $err; ?></div>
+					<?php endif; ?>
 					<!-- Content -->
 
 					<?php
@@ -169,7 +178,6 @@ if (isset($_POST['open_account'])) {
 															<label for="client_name">Account Type Rates (%)</label>
 														</div>
 													</div>
-
 													<div class="col-md-6">
 														<div class="form-floating form-floating-outline">
 															<input type="text" name="acc_name" required class="form-control" id="AccountName">
@@ -186,6 +194,15 @@ if (isset($_POST['open_account'])) {
 															<input type="text" name="account_number" value="<?php echo $_accnumber; ?>" required class="form-control" id="AccountNumber<">
 															<label for="client_name">Account Number</label>
 														</div>
+													</div>
+													<div class=" col-md-6 form-group" style="display:none">
+														<label for="exampleInputEmail1">Account Status</label>
+														<input type="text" name="acc_status" value="Active" readonly required class="form-control">
+													</div>
+
+													<div class=" col-md-6 form-group" style="display:none">
+														<label for="exampleInputEmail1">Account Amount</label>
+														<input type="text" name="acc_amount" value="0" readonly required class="form-control">
 													</div>
 												</div>
 												<div class="mt-6">
@@ -213,26 +230,27 @@ if (isset($_POST['open_account'])) {
 		<!-- / Layout wrapper -->
 
 
-		<!-- Core JS -->
-		<!-- build:js assets/vendor/js/core.js -->
-		<script src="../assets/vendor/libs/jquery/jquery.js"></script>
-		<script src="../assets/vendor/libs/popper/popper.js"></script>
-		<script src="../assets/vendor/js/bootstrap.js"></script>
-		<script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-		<script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-		<script src="../assets/vendor/js/menu.js"></script>
+		 <!-- script -->
+		 <?php include 'components/script.php'; ?>
 
-		<!-- endbuild -->
+		<script>
+			function getiBankAccs(accountType) {
+				// Create a new XMLHttpRequest
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "fetch_account_rates.php?acc_type=" + accountType, true);
+				xhr.onload = function() {
+					if (xhr.status === 200) {
+						// Update the Account Rates input field with the response
+						document.getElementById("AccountRates").value = xhr.responseText;
+					} else {
+						// Handle errors here
+						console.error("Error fetching account rates");
+					}
+				};
+				xhr.send();
+			}
+		</script>
 
-		<!-- Vendors JS -->
-
-		<!-- Main JS -->
-		<script src="../assets/js/main.js"></script>
-
-		<!-- Page JS -->
-
-		<!-- Place this tag before closing body tag for github widget button. -->
-		<script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

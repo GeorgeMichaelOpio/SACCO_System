@@ -68,7 +68,7 @@ $admin_id = $_SESSION['admin_id'];
           <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Hoverable Table rows -->
             <div class="card">
-              <h5 class="card-header"><?php echo $row->name; ?> iBanking Accounts</h5>
+              <h5 class="card-header"><?php echo $row->name; ?> Cheapy Accounts</h5>
               <h7 class="card-header">Select on any action options to manage enquiries</h7>
               <div class="table-responsive">
                 <table id="export"  class="table table-hover table-bordered table-striped">
@@ -143,30 +143,8 @@ $admin_id = $_SESSION['admin_id'];
   <!-- / Layout wrapper -->
 
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="../assets/vendor/libs/popper/popper.js"></script>
-  <script src="../assets/vendor/js/bootstrap.js"></script>
-  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="../assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-
-  <!-- Main JS -->
-  <script src="../assets/js/main.js"></script>
-
-  <!-- Page JS -->
-
-  <!-- Place this tag before closing body tag for github widget button. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-
-  <!-- DateTables -->
-  <script src="../assets/datatables/jquery.dataTables.js"></script>
-  <script src="../assets/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+   <!-- script -->
+   <?php include 'components/script.php'; ?>
 
    <!-- page script -->
    <script>

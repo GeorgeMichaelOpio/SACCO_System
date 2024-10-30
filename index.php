@@ -1,296 +1,264 @@
 <!DOCTYPE html>
-<html lang="en" class="light-style customizer-hide" dir="ltr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>Cheapy SACCO</title>
-    <meta name="description" content="Cheapy SACCO - Building Financial Freedom Together" />
+<html lang="en">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/svg/icon.svg" />
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Cheapy</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <!-- Favicons -->
+  <link href="assets/svg/icon.svg" rel="icon">
+  <link href="assets/svg/icon.svg" rel="apple-touch-icon">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <style>
-      /* Colors */
-      :root {
-        --primary-color: #8c57ff;
-        --secondary-color: #4b0082;
-        --light-color:#8c57ff;
-        --dark-color: #343a40;
-        --text-light: #ffffff;
-      }
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-      body {
-        background-color: var(--light-color);
-        font-family: 'Open Sans', sans-serif;
-      }
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
 
-      /* Navbar */
-      .navbar {
-        background-color: var(--dark-color);
-      }
-      .navbar .nav-link {
-        color: var(--text-light);
-      }
-      .navbar .nav-link:hover {
-        color: var(--primary-color);
-      }
+</head>
 
-      /* Hero Section */
-      .hero-section {
-        text-align: center;
-        padding: 100px 20px;
-        background-color: var(--primary-color);
-        color: var(--text-light);
-      }
-      .hero-section h1 {
-        font-size: 3rem;
-        font-weight: 700;
-      }
-      .hero-section p {
-        font-size: 1.2rem;
-        margin-bottom: 30px;
-      }
-      .hero-section .btn {
-        padding: 15px 30px;
-        font-size: 1.1rem;
-        border-radius: 30px;
-        background-color: var(--secondary-color);
-        border: none;
-        color: var(--text-light);
-        transition: background-color 0.3s ease;
-      }
-      .hero-section .btn:hover {
-        background-color: var(--primary-color);
-        color: var(--text-light);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
+<body class="index-page">
 
-      /* Features Section */
-      .features-section {
-        padding: 50px 20px;
-        background-color: var(--light-color);
-      }
-      .features-section h3 {
-        text-align: center;
-        margin-bottom: 50px;
-        font-weight: 600;
-      }
-      .feature-card {
-        border: none;
-        background-color: #ffffff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-        padding: 30px;
-        text-align: center;
-      }
-      .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-      }
-      .feature-card img {
-        width: 80px;
-        margin-bottom: 20px;
-      }
-      .feature-card h4 {
-        color: var(--primary-color);
-        font-weight: 600;
-      }
+<header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl d-flex align-items-center justify-content-between">
+      <a href="" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">Cheapy</h1>
+      </a>
 
-      /* Testimonials Section */
-      .testimonials-section {
-        padding: 50px 20px;
-        background-color: var(--primary-color);
-        color: var(--text-light);
-      }
-      .testimonials-section h3 {
-        text-align: center;
-        margin-bottom: 50px;
-        font-weight: 600;
-        color: var(--text-light);
-      }
-      .testimonial-card {
-        background-color: var(--secondary-color);
-        border-radius: 10px;
-        padding: 20px;
-        color: var(--text-light);
-        margin-bottom: 20px;
-      }
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="#hero" class="active">Home</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li class="dropdown"><a href="#"><span>Login</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="#">Client</a></li>
+              <li><a href="admin/pages_login.php">Admin</a></li>
+            </ul>
+          </li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
 
-      /* CTA Section */
-      .cta-section {
-        text-align: center;
-        margin-top: 50px;
-      }
-      .cta-section .btn {
-        margin: 10px;
-        padding: 15px 40px;
-        font-size: 1.1rem;
-        border-radius: 30px;
-        background-color: var(--primary-color);
-        color: var(--text-light);
-        transition: background-color 0.3s ease, box-shadow 0.3s;
-      }
-      .cta-section .btn:hover {
-        background-color: var(--secondary-color);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Footer */
-      footer {
-        padding: 20px;
-        text-align: center;
-        background-color: var(--dark-color);
-        color: var(--text-light);
-        margin-top: 50px;
-      }
-      footer a {
-        color: var(--text-light);
-        text-decoration: none;
-        margin: 0 10px;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
-
-      /* Media Queries */
-      @media (max-width: 768px) {
-        .hero-section h1 {
-          font-size: 2.5rem;
-        }
-        .hero-section p {
-          font-size: 1rem;
-        }
-        .features-section {
-          padding: 30px 10px;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-      <div class="container">
-        <a class="navbar-brand" href="">Cheapy SACCO</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="">Features</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="">Contact</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Login
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="admin/pages_login.php">Login as Admin</a>
-                <a class="dropdown-item" href="#">Login as Client</a>
-                <a class="dropdown-item" href="#">Login as Staff</a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <h1>Welcome to Cheapy SACCO</h1>
-      <p>"Empowering Financial Growth through Savings & Credit."</p>
-      <a href="#" class="btn btn-lg mt-4">Join Cheapy SACCO</a>
+      <a class="btn-getstarted" href="#about">Get Started</a>
     </div>
+  </header>
 
-    <!-- Features Section -->
-    <div class="features-section container">
-      <h3 id="features">Why Choose Cheapy SACCO?</h3>
-      <div class="row">
-        <div class="col-md-4 mb-4">
-          <div class="card feature-card">
-            <img src="assets/img/icons/savings.svg" alt="Savings Plans" />
-            <h4>Flexible Savings Plans</h4>
-            <p>Save securely and watch your money grow with high interest rates.</p>
-          </div>
-        </div>
-        <div class="col-md-4 mb-4">
-          <div class="card feature-card">
-            <img src="assets/img/icons/loans.svg" alt="Affordable Loans" />
-            <h4>Affordable Loans</h4>
-            <p>Access low-interest loans to meet your personal and business needs.</p>
-          </div>
-        </div>
-        <div class="col-md-4 mb-4">
-          <div class="card feature-card">
-            <img src="assets/img/icons/community.svg" alt="Community Support" />
-            <h4>Community Support</h4>
-            <p>Be part of a thriving community that supports your financial journey.</p>
-          </div>
-        </div>
-      </div>
+  <main class="main">
 
-      <!-- Call-to-Action Section -->
-      <div class="cta-section">
-        <a href="#" class="btn btn-primary btn-lg mt-4">Apply for a Loan</a>
-        <a href="#" class="btn btn-primary btn-lg mt-4">Learn About Savings</a>
-        <a href="#" class="btn btn-primary btn-lg mt-4">Contact Us</a>
-      </div>
-    </div>
-
-    <!-- Testimonials Section -->
-    <div class="testimonials-section">
-      <h3>What Our Members Say</h3>
-      <div class="container">
-        <div class="row">
-          <div class="col-md-4 mb-4">
-            <div class="testimonial-card">
-              <p>"Cheapy SACCO helped me grow my business with an affordable loan. The process was smooth and transparent."</p>
-              <small>- John K., Business Owner</small>
+  <section id="hero" class="hero section">
+      <div class="container" data-aos="fade-up">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <div class="hero-content">
+              <h1 class="mb-4">
+                Financial Empowerment <br>
+                <span class="accent-text">For a Brighter Future</span>
+              </h1>
+              <p class="mb-4 mb-md-5">
+                Join Cheapy SACCO today to save, borrow, and grow. We are here to help you achieve financial freedom and support your goals.
+              </p>
             </div>
           </div>
-          <div class="col-md-4 mb-4">
-            <div class="testimonial-card">
-              <p>"I have been saving with Cheapy SACCO for 3 years and the interest rates are fantastic. My financial future is secure."</p>
-              <small>- Sarah M., Teacher</small>
-            </div>
-          </div>
-          <div class="col-md-4 mb-4">
-            <div class="testimonial-card">
-              <p>"Being a part of Cheapy SACCO has given me financial freedom. The community support is amazing."</p>
-              <small>- Kevin L., Farmer</small>
+          <div class="col-lg-6">
+            <div class="hero-image" data-aos="zoom-out">
+              <img src="assets/img/illustration-1.webp" alt="SACCO Services" class="img-fluid">
             </div>
           </div>
         </div>
       </div>
+    </section>
+
+    
+
+    
+    <!-- Contact Section -->
+    <section id="contact" class="contact section light-background">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Contact</h2>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row g-4 g-lg-5">
+        <div class="col-lg-5">
+  <div class="info-box" data-aos="fade-up" data-aos-delay="200">
+    <h3>Contact Info</h3>
+    <p>We'd love to hear from you! Reach out for inquiries, support, or just to say hello.</p>
+
+    <div class="info-item" data-aos="fade-up" data-aos-delay="300">
+      <div class="icon-box">
+        <i class="bi bi-geo-alt"></i>
+      </div>
+      <div class="content">
+        <h4>Our Location</h4>
+        <p>123 Innovation Way</p>
+        <p>Mbarara, Uganda</p>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-      <p>&copy; 2024 Cheapy SACCO. All Rights Reserved.</p>
-      <p>
-        <a href="#">Support</a> |
-        <a href="#">Documentation</a> |
-        <a href="#">Changelog</a>
-      </p>
-    </footer>
+    <div class="info-item" data-aos="fade-up" data-aos-delay="400">
+      <div class="icon-box">
+        <i class="bi bi-telephone"></i>
+      </div>
+      <div class="content">
+        <h4>Phone Number</h4>
+        <p>+256 770 123456</p>
+        <p>+256 774 654321</p>
+      </div>
+    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+    <div class="info-item" data-aos="fade-up" data-aos-delay="500">
+      <div class="icon-box">
+        <i class="bi bi-envelope"></i>
+      </div>
+      <div class="content">
+        <h4>Email Address</h4>
+        <p>info@yourdomain.com</p>
+        <p>support@yourdomain.com</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+          <div class="col-lg-7">
+            <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
+              <h3>Get In Touch</h3>
+              <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="200">
+                <div class="row gy-4">
+
+                  <div class="col-md-6">
+                    <input type="text" name="name" class="form-control" placeholder="Your Name" required="">
+                  </div>
+
+                  <div class="col-md-6 ">
+                    <input type="email" class="form-control" name="email" placeholder="Your Email" required="">
+                  </div>
+
+                  <div class="col-12">
+                    <input type="text" class="form-control" name="subject" placeholder="Subject" required="">
+                  </div>
+
+                  <div class="col-12">
+                    <textarea class="form-control" name="message" rows="6" placeholder="Message" required=""></textarea>
+                  </div>
+
+                  <div class="col-12 text-center">
+                    <div class="loading">Loading</div>
+                    <div class="error-message"></div>
+                    <div class="sent-message">Your message has been sent. Thank you!</div>
+
+                    <button type="submit" class="btn">Send Message</button>
+                  </div>
+
+                </div>
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Contact Section -->
+
+  </main>
+
+  <footer id="footer" class="footer">
+
+<div class="container footer-top">
+  <div class="row gy-4">
+    <div class="col-lg-4 col-md-6 footer-about">
+      <a class="logo d-flex align-items-center">
+        <span class="sitename">Cheapy SACCO</span>
+      </a>
+      <div class="footer-contact pt-3">
+        <p>123 Prosperity Street</p>
+        <p>Mbarara, Uganda</p>
+        <p class="mt-3"><strong>Phone:</strong> <span>+256 123 456 789</span></p>
+        <p><strong>Email:</strong> <span>support@cheapysacco.com</span></p>
+      </div>
+      <div class="social-links d-flex mt-4">
+        <a ><i class="bi bi-twitter"></i></a>
+        <a ><i class="bi bi-facebook"></i></a>
+        <a ><i class="bi bi-instagram"></i></a>
+        <a ><i class="bi bi-linkedin"></i></a>
+      </div>
+    </div>
+
+    <div class="col-lg-2 col-md-3 footer-links">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a >Home</a></li>
+        <li><a >About Us</a></li>
+        <li><a >Services</a></li>
+        <li><a >Contact</a></li>
+        <li><a >FAQs</a></li>
+      </ul>
+    </div>
+
+    <div class="col-lg-2 col-md-3 footer-links">
+      <h4>Our Services</h4>
+      <ul>
+        <li><a >Savings Accounts</a></li>
+        <li><a >Loan Services</a></li>
+        <li><a >Insurance</a></li>
+        <li><a >Financial Literacy</a></li>
+        <li><a >Business Support</a></li>
+      </ul>
+    </div>
+
+<!-- Newsletter Subscription Section -->
+<div class="col-lg-4 col-md-6 footer-newsletter">
+  <h4 class="newsletter-title">Join Our Newsletter</h4>
+  <p class="newsletter-text">
+    Stay updated with the latest offers, news, and insights from Cheapy SACCO. Subscribe now!
+  </p>
+  <form action="" method="post" class="newsletter-form d-flex">
+    <input type="email" name="email" placeholder="Enter your email" required class="form-control newsletter-input me-2">
+    <button type="submit" class="btn btn-subscribe">Subscribe</button>
+  </form>
+</div>
+
+  </div>
+</div>
+
+<div class="container text-center mt-4">
+  <p>© <strong class="px-1 sitename">Cheapy SACCO</strong> | All Rights Reserved</p>
+</div>
+
+</footer>
+
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/index_main.js"></script>
+
+</body>
+
 </html>

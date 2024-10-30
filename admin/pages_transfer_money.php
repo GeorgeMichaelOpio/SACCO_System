@@ -1,40 +1,44 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
-//register new account
 
+// Include PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../assets/vendor/phpmailer/src/Exception.php';
+require '../assets/vendor/phpmailer/src/PHPMailer.php';
+require '../assets/vendor/phpmailer/src/SMTP.php';
+
+// Register new account
 if (isset($_POST['deposit'])) {
     $tr_code = $_POST['tr_code'];
     $account_id = $_GET['account_id'];
     $acc_name = $_POST['acc_name'];
-    $account_number = $_GET['account_number'];
+    $account_number = $_POST['account_number'];
     $acc_type = $_POST['acc_type'];
-    //$acc_amount  = $_POST['acc_amount'];
     $tr_type  = $_POST['tr_type'];
     $tr_status = $_POST['tr_status'];
-    $client_id  = $_GET['client_id'];
+    $client_id = $_POST['client_id'] ?? $_GET['client_id'];
     $client_name  = $_POST['client_name'];
-    $client_national_id  = $_POST['client_national_id'];
+    $client_email = $_POST['client_email']; // Add this field for email
+    $client_national_id = $_POST['client_national_id'] ?? '';
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
-
-    //Few fields to hold funds transfers
     $receiving_acc_no = $_POST['receiving_acc_no'];
     $receiving_acc_name = $_POST['receiving_acc_name'];
-    $receiving_acc_holder = $_POST['receiving_acc_holder'];
+    $receiving_client_name = $_POST['receiving_client_name'];
+    $notification_details = "$client_name has transferred $$transaction_amt from account $account_number to account $receiving_acc_no";
 
-    //Notication
-    $notification_details = "$client_name Has Transfered $ $transaction_amt From Bank Account $account_number To Bank Account $receiving_acc_no";
-
-
-    /*
-            *You cant transfer money from an bank account that has no money in it so
-            *Lets Handle that here.
-            */
-    $result = "SELECT SUM(transaction_amt) FROM  ib_transactions  WHERE account_id=?";
+    // Check account balance
+    $result = "SELECT SUM(transaction_amt) FROM ib_transactions WHERE account_id=?";
     $stmt = $mysqli->prepare($result);
     $stmt->bind_param('i', $account_id);
     $stmt->execute();
@@ -42,40 +46,60 @@ if (isset($_POST['deposit'])) {
     $stmt->fetch();
     $stmt->close();
 
-
-
-
     if ($transaction_amt > $amt) {
-        $transaction_error  =  "You Do Not Have Sufficient Funds In Your Account For Transfer Your Current Account Balance Is $ $amt";
+        $_SESSION['err'] = "Insufficient funds. Current balance: $$amt";
     } else {
-
-
-        //Insert Captured information to a database table
-        $query = "INSERT INTO ib_transactions (tr_code, account_id, acc_name, account_number, acc_type,  tr_type, tr_status, client_id, client_name, client_national_id, transaction_amt, client_phone, receiving_acc_no, receiving_acc_name, receiving_acc_holder) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        $notification = "INSERT INTO  ib_notifications (notification_details) VALUES (?)";
+        // Insert transaction and notification
+        $query = "INSERT INTO ib_transactions (tr_code, account_id, acc_name, account_number, acc_type, tr_type, tr_status, client_id, client_name, client_national_id, transaction_amt, client_phone, receiving_acc_no, receiving_acc_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $notification = "INSERT INTO ib_notifications (notification_details) VALUES (?)";
 
         $stmt = $mysqli->prepare($query);
         $notification_stmt = $mysqli->prepare($notification);
+        $stmt->bind_param('ssssssssssssss', $tr_code, $account_id, $acc_name, $account_number, $acc_type, $tr_type, $tr_status, $client_id, $client_name, $client_national_id, $transaction_amt, $client_phone, $receiving_acc_no, $receiving_acc_name);
+        $notification_stmt->bind_param('s', $notification_details);
 
-        //bind paramaters
-        $rc = $stmt->bind_param('sssssssssssssss', $tr_code, $account_id, $acc_name, $account_number, $acc_type, $tr_type, $tr_status, $client_id, $client_name, $client_national_id, $transaction_amt, $client_phone, $receiving_acc_no, $receiving_acc_name, $receiving_acc_holder);
-        $rc = $notification_stmt->bind_param('s', $notification_details);
+        if ($stmt->execute() && $notification_stmt->execute()) {
+            $_SESSION['success'] = "Money Transferred";
 
-        $stmt->execute();
-        $notification_stmt->execute();
+            // Send Email
+            $mail = new PHPMailer(true);
 
+            try {
+                // Server settings
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username = 'georgemichaelopio@gmail.com';
+                $mail->Password = 'password';
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587;
 
-        //declare a varible which will be passed to alert function
-        if ($stmt && $notification_stmt) {
-            $success = "Money Transfered";
+                // Recipient and sender
+                $mail->setFrom('georgemichaelopio@gmail.com', 'Bank Notifications');
+                    $mail->addAddress('0abc0xyz@proton.me', $client_name);
+
+                // Email content
+                $mail->isHTML(true);
+                $mail->Subject = 'Successful Transaction Notification';
+                $mail->Body    = "
+                    <h3>Transaction Successful</h3>
+                    <p>Dear $client_name,</p>
+                    <p>Your transfer of $$transaction_amt from account $account_number to account $receiving_acc_no has been successfully completed.</p>
+                    <p>Transaction Code: $tr_code</p>
+                    <p>Thank you for using our service!</p>
+                ";
+
+                $mail->send();
+            } catch (Exception $e) {
+                $_SESSION['err'] = "Transaction successful, but email could not be sent. Error: {$mail->ErrorInfo}";
+            }
         } else {
-            $err = "Please Try Again Or Try Later";
+            $_SESSION['err'] = "Please try again later";
         }
     }
+    header("Location: " . $_SERVER['PHP_SELF'] . "?account_id=" . $account_id);
+    exit;
 }
-
-
-
 ?>
 
 <!doctype html>
@@ -142,6 +166,18 @@ if (isset($_POST['deposit'])) {
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
+
+                 <!-- Add Alert Messages Here -->
+                 <?php if (isset($_SESSION['err'])): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?php echo $_SESSION['err']; unset($_SESSION['err']); ?>
+                        </div>
+                    <?php elseif (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success" role="alert">
+                            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Content -->
                         <div class="container-xxl flex-grow-1 container-p-y">
                             <!-- Basic Layout -->
@@ -153,7 +189,9 @@ if (isset($_POST['deposit'])) {
                                         </div>
                                         <div class="card-body pt-0">
                                             <form method="post" enctype="multipart/form-data" role="form">
-                                                <div class="row mt-1 g-5">
+                                            <input type="hidden" name="client_id" value="<?php echo $row->client_id; ?>"> <!-- Ensure this exists -->
+                                            <input type="hidden" name="client_national_id" value="<?php echo $row->client_national_id; ?>"> <!-- Hidden field for client_national_id -->  
+                                            <div class="row mt-1 g-5">
                                                     <div class="col-md-6">
                                                         <div class="form-floating form-floating-outline">
                                                             <input type="text" readonly name="client_name" value="<?php echo $row->client_name; ?>" required class="form-control" id="client_name">
@@ -162,7 +200,7 @@ if (isset($_POST['deposit'])) {
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-floating form-floating-outline">
-                                                            <input type="text" readonly value="<?php echo $row->client_national_id; ?>" name="client_national_id" required class="form-control" id="ClientNationalId">
+                                                            <input type="text" readonly value="<?php echo $row->client_national_id; ?>" name="client_nationalsss_id" required class="form-control" id="ClientNationalId">
                                                             <label for="ClientNationalId">Client National ID No.</label>
                                                         </div>
                                                     </div>
@@ -198,7 +236,7 @@ if (isset($_POST['deposit'])) {
                                                             $length = 20;
                                                             $_transcode =  substr(str_shuffle('0123456789QWERgfdsazxcvbnTYUIOqwertyuioplkjhmPASDFGHJKLMNBVCXZ'), 1, $length);
                                                             ?>
-                                                            <input type="text" readonly name="client_number" value="<?php echo $_transcode; ?>" class="form-control" id="Transaction_Code">
+                                                            <input type="text" readonly name="tr_code" value="<?php echo $_transcode; ?>" class="form-control" id="Transaction_Code">
                                                             <label for="Transaction_Code">Transaction Code</label>
                                                         </div>
                                                     </div>
@@ -237,17 +275,17 @@ if (isset($_POST['deposit'])) {
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="form-floating form-floating-outline">
-                                                            <input type="text" name="receiving_acc_name" required class="form-control" id="Receiving_Acc_Name">
-                                                            <label for="Receiving_Acc_Name">Receiving Account Name</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-floating form-floating-outline">
-                                                            <input type="text" name="receiving_acc_holder" required class="form-control" id="Receiving_Acc_Holder">
-                                                            <label for="Receiving_Acc_Holder">Receiving Account Holder</label>
-                                                        </div>
-                                                    </div>
+    <div class="form-floating form-floating-outline">
+        <input type="text" name="receiving_acc_name" id="Receiving_Acc_Name" required class="form-control">
+        <label for="Receiving_Acc_Name">Receiving Account Name</label>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="form-floating form-floating-outline">
+        <input type="text" name="receiving_client_name" id="Receiving_client_name" required class="form-control">
+        <label for="Receiving_client_name">Receiving Account Holder</label>
+    </div>
+</div>
 
 
                                                     <div class=" col-md-4 form-group" style="display:none">
@@ -285,26 +323,31 @@ if (isset($_POST['deposit'])) {
         <!-- / Layout wrapper -->
 
 
-        <!-- Core JS -->
-        <!-- build:js assets/vendor/js/core.js -->
-        <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="../assets/vendor/libs/popper/popper.js"></script>
-        <script src="../assets/vendor/js/bootstrap.js"></script>
-        <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-        <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="../assets/vendor/js/menu.js"></script>
+    <!-- script -->
+    <?php include 'components/script.php'; ?>
 
-        <!-- endbuild -->
+        <script>
+function getiBankAccs(accountNumber) {
+    if (accountNumber) {
+        fetch(`fetch_account_details.php?account_number=${accountNumber}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.acc_name && data.client_name) {
+                    document.getElementById('Receiving_Acc_Name').value = data.acc_name;
+                    document.getElementById('Receiving_client_name').value = data.client_name;
+                } else {
+                    document.getElementById('Receiving_Acc_Name').value = '';
+                    document.getElementById('Receiving_client_name').value = '';
+                }
+            })
+            .catch(error => console.error('Error fetching account details:', error));
+    } else {
+        document.getElementById('Receiving_Acc_Name').value = '';
+        document.getElementById('Receiving_client_name').value = '';
+    }
+}
+</script>
 
-        <!-- Vendors JS -->
-
-        <!-- Main JS -->
-        <script src="../assets/js/main.js"></script>
-
-        <!-- Page JS -->
-
-        <!-- Place this tag before closing body tag for github widget button. -->
-        <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

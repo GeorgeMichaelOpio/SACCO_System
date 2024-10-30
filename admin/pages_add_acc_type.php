@@ -1,31 +1,43 @@
 <?php
-session_start();
+ini_set('display_errors', 1);
 include('conf/config.php');
 include('conf/checklogin.php');
+
+session_start();
+include_once('conf/config.php');
+include_once('conf/checklogin.php');
 check_login();
 $admin_id = $_SESSION['admin_id'];
+
+$success = $err = ""; // Initialize success and error messages
+
 if (isset($_POST['create_acc_type'])) {
-  //Register  account type
+  // Register account type
   $name = $_POST['name'];
   $description = $_POST['description'];
   $rate = $_POST['rate'];
   $code = $_POST['code'];
 
-  //Insert Captured information to a database table
-  $query = "INSERT INTO ib_acc_types (name, description, rate, code) VALUES (?,?,?,?)";
+  // Insert Captured information into the database table
+  $query = "INSERT INTO ib_acc_types (name, description, rate, code) VALUES (?, ?, ?, ?)";
   $stmt = $mysqli->prepare($query);
-  //bind paramaters
-  $rc = $stmt->bind_param('ssss', $name, $description, $rate, $code);
-  $stmt->execute();
 
-  //declare a varible which will be passed to alert function
   if ($stmt) {
-    $success = "Account Category Created";
+    // Bind parameters
+    $stmt->bind_param('ssss', $name, $description, $rate, $code);
+    $stmt->execute();
+
+    // Check if insertion was successful
+    if ($stmt->affected_rows > 0) {
+      $success = "Account Category Created Successfully!";
+    } else {
+      $err = "Failed to create account category. Please try again.";
+    }
+    $stmt->close();
   } else {
-    $err = "Please Try Again Or Try Later";
+    $err = "Database Error: Unable to prepare statement.";
   }
 }
-
 ?>
 
 <!doctype html>
@@ -39,47 +51,8 @@ if (isset($_POST['create_acc_type'])) {
   data-template="vertical-menu-template-free"
   data-style="light">
 
-<head>
-  <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
-  <title>Admin | Add Account</title>
-
-  <meta name="description" content="" />
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="../assets/svg/icon.svg" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap"
-    rel="stylesheet" />
-
-  <link rel="stylesheet" href="../assets/vendor/fonts/remixicon/remixicon.css" />
-
-  <!-- Menu waves for no-customizer fix -->
-  <link rel="stylesheet" href="../assets/vendor/libs/node-waves/node-waves.css" />
-
-  <!-- Core CSS -->
-  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
-  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-  <link rel="stylesheet" href="../assets/css/demo.css" />
-
-  <!-- Vendors CSS -->
-  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-
-  <!-- Page CSS -->
-
-  <!-- Helpers -->
-  <script src="../assets/vendor/js/helpers.js"></script>
-  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-  <script src="../assets/js/config.js"></script>
-</head>
+        <!-- header -->
+        <?php include 'components/head.php'; ?>
 
 <body>
   <!-- Layout wrapper -->
@@ -114,6 +87,14 @@ if (isset($_POST['create_acc_type'])) {
         <div class="content-wrapper">
           <!-- Content -->
 
+
+                    <!-- Display success or error messages -->
+                    <?php if ($success): ?>
+                      <div class="alert alert-success"><?php echo $success; ?></div>
+                    <?php elseif ($err): ?>
+                      <div class="alert alert-danger"><?php echo $err; ?></div>
+                    <?php endif; ?>
+
           <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Basic Layout -->
             <div class="row">
@@ -123,7 +104,7 @@ if (isset($_POST['create_acc_type'])) {
                     <h5 class="mb-0">Create Account Categories</h5>
                   </div>
                   <div class="card-body">
-                    <form>
+                  <form method="post">
                       <div class="form-floating form-floating-outline mb-6">
                         <input type="text" class="form-control" name="name" required id="Accountname" />
                         <label for="Accountname">Account Category Name</label>
@@ -145,7 +126,7 @@ if (isset($_POST['create_acc_type'])) {
                         <textarea
                           id="descriptionInput"
                           class="form-control"
-                          pname="description" required
+                          name="description" required
                           style="height: 60px"></textarea>
                         <label for="descriptionInput">Account Category Decription</label>
                       </div>
@@ -172,26 +153,9 @@ if (isset($_POST['create_acc_type'])) {
   <!-- / Layout wrapper -->
 
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="../assets/vendor/libs/popper/popper.js"></script>
-  <script src="../assets/vendor/js/bootstrap.js"></script>
-  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="../assets/vendor/js/menu.js"></script>
+      <!-- script -->
+      <?php include 'components/script.php'; ?>
 
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-
-  <!-- Main JS -->
-  <script src="../assets/js/main.js"></script>
-
-  <!-- Page JS -->
-
-  <!-- Place this tag before closing body tag for github widget button. -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

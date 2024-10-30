@@ -135,31 +135,8 @@ $admin_id = $_SESSION['admin_id'];
   </div>
   <!-- / Layout wrapper -->
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="../assets/vendor/libs/popper/popper.js"></script>
-  <script src="../assets/vendor/js/bootstrap.js"></script>
-  <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="../assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-  <script src="../assets/vendor/libs/apex-charts/apexcharts.js"></script>
-
-  <!-- Main JS -->
-  <script src="../assets/js/main.js"></script>
-
-  <!-- DataTables -->
-  <script src="../assets/datatables/jquery.dataTables.js"></script>
-  <script src="../assets/datatables-bs4/js/dataTables.bootstrap4.js"></script>
-  
-  <!-- AdminLTE App -->
-
-  <!-- Page JS -->
-  <script src="../assets/js/dashboards-analytics.js"></script>
+    <!-- script -->
+    <?php include 'components/script.php'; ?>
 
   <!-- Place this tag before closing body tag for github widget button. -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -178,12 +155,6 @@ $admin_id = $_SESSION['admin_id'];
       });
     });
   </script>
-  <!-- Data Tables V2.01 -->
-  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
-  <script src="../assets/datatable/button-ext/dataTables.buttons.min.js"></script>
-  <script src="../assets/datatable/button-ext/jszip.min.js"></script>
-  <script src="../assets/datatable/button-ext/buttons.html5.min.js"></script>
-  <script src="../assets/datatable/button-ext/buttons.print.min.js"></script>
   <script>
     $('#export').DataTable({
       dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
