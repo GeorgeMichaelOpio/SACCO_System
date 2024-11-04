@@ -1,5 +1,17 @@
-**Admin Login Details**
-
 Email	: admin@mail.com
-Password: codeastro.com
+Password: 1234
 
+Clients:
+john@mail.com
+amanda@mail.com
+ann@mail.com
+marvin@mail.com
+harry@mail.com
+johnnie@mail.com
+gillian@mail.com
+liam@mail.com
+christine@mail.com
+
+Password: 1234
+
+Url: https://cheapy.vastserve.com/

@@ -7,7 +7,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 // Register new loan
 if (isset($_POST['apply_loan'])) {
@@ -19,45 +19,36 @@ if (isset($_POST['apply_loan'])) {
     $ln_amount = $_POST['ln_amount'];
     $interest_rate = $_POST['interest_rate'];
     $ln_period = $_POST['ln_period'];
-    $ln_status = "Pending";
+    $ln_status = "Pending"; // Assuming loan status is "Pending" at creation
     $client_id = $_GET['client_id'];
     $client_name = $_POST['client_name'];
-    $client_email = $_POST['client_email'];
     $client_national_id = $_POST['client_national_id'];
     $client_phone = $_POST['client_phone'];
 
-    // Notification details
-    $notification_details = "$client_name has applied for a loan of $ln_amount with Account Number $account_number";
+    // Notification
+    $notification_details = "$client_name has applied for a loan of $ $ln_amount with Account Number $account_number";
 
     // Insert loan details into ib_loans table
-    $query = "INSERT INTO ib_loans (ln_code, account_id, acc_name, account_number, acc_type, client_email, ln_amount, interest_rate, ln_status, client_id, client_name, client_national_id, client_phone, ln_period) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO ib_loans (ln_code, account_id, acc_name, account_number, acc_type, ln_amount, interest_rate, ln_status, client_id, client_name, client_national_id, client_phone, ln_period) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     $notification = "INSERT INTO ib_notifications (notification_details) VALUES (?)";
 
     $stmt = $mysqli->prepare($query);
     $notification_stmt = $mysqli->prepare($notification);
 
-    // Check if the statements were prepared successfully
+    // Bind parameters
+    $rc = $notification_stmt->bind_param('s', $notification_details);
+    $rc = $stmt->bind_param('sssssssssssss', $ln_code, $account_id, $acc_name, $account_number, $acc_type, $ln_amount, $interest_rate, $ln_status, $client_id, $client_name, $client_national_id, $client_phone, $ln_period);
+    $stmt->execute();
+    $notification_stmt->execute();
+
+    // Declare a variable to pass to alert function
     if ($stmt && $notification_stmt) {
-        // Bind parameters
-        $stmt->bind_param('ssssssssssssss', $ln_code, $account_id, $acc_name, $account_number, $acc_type, $client_email, $ln_amount, $interest_rate, $ln_status, $client_id, $client_name, $client_national_id, $client_phone, $ln_period);
-        $notification_stmt->bind_param('s', $notification_details);
-
-        // Execute statements
-        if ($stmt->execute() && $notification_stmt->execute()) {
-            $success = "Loan Application Submitted";
-        } else {
-            $err = "Failed to submit application: " . $stmt->error;
-        }
-
-        // Close the statements
-        $stmt->close();
-        $notification_stmt->close();
+        $success = "Loan Application Submitted";
     } else {
-        $err = "Failed to prepare statements: " . $mysqli->error;
+        $err = "Please Try Again Or Try Later";
     }
 }
 ?>
-
 
 <!doctype html>
 <html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free" data-style="light">
@@ -116,12 +107,6 @@ if (isset($_POST['apply_loan'])) {
                                                         <div class="form-floating form-floating-outline">
                                                             <input type="text" readonly name="client_phone" value="<?php echo $row->client_phone; ?>" required class="form-control" id="ClientPhoneNumber">
                                                             <label for="ClientPhoneNumber">Client Phone Number</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-floating form-floating-outline">
-                                                            <input type="text" readonly name="client_email" value="<?php echo $row->client_email; ?>" readonly required class="form-control" id="client_email">
-                                                            <label for="client_email">client_email</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
@@ -187,12 +172,12 @@ if (isset($_POST['apply_loan'])) {
                                                         </div>
                                                     </div>
 
-                                                <div class="col-md-6">
-                                                    <div class="form-floating form-floating-outline">
-                                                        <input type="text" name="amount_to_repay" id="AmountToRepay" class="form-control" readonly>
-                                                        <label for="AmountToRepay">Amount to Repay</label>
+                                                    <div class="col-md-6">
+                                                        <div class="form-floating form-floating-outline">
+                                                            <input type="text" name="amount_to_repay" id="AmountToRepay" class="form-control" readonly>
+                                                            <label for="AmountToRepay">Amount to Repay</label>
+                                                        </div>
                                                     </div>
-                                                </div>
                                                 </div>
 
                                                 <div class="mt-6">
@@ -211,6 +196,10 @@ if (isset($_POST['apply_loan'])) {
             </div>
             <div class="layout-overlay layout-menu-toggle"></div>
         </div>
+
+        <!-- script -->
+        <?php include 'components/script.php'; ?>
+
 
         <!-- script -->
         <script>
@@ -257,6 +246,7 @@ if (isset($_POST['apply_loan'])) {
                 }
             });
         </script>
+
 </body>
 
 </html>

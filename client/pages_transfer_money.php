@@ -7,7 +7,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 // Include PHPMailer classes
 use PHPMailer\PHPMailer\PHPMailer;
@@ -34,7 +34,6 @@ if (isset($_POST['deposit'])) {
     $client_phone = $_POST['client_phone'];
     $receiving_acc_no = $_POST['receiving_acc_no'];
     $receiving_acc_name = $_POST['receiving_acc_name'];
-    $client_email  = $_POST['client_email'];
     $receiving_client_name = $_POST['receiving_client_name'];
     $notification_details = "$client_name has transferred $$transaction_amt from account $account_number to account $receiving_acc_no";
 
@@ -71,14 +70,13 @@ if (isset($_POST['deposit'])) {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username = 'georgemichaelopio@gmail.com';
-                $mail->Password = 'igrvwtdrzijdtfth';
+                $mail->Password = 'password';
                 $mail->SMTPSecure = 'tls';
                 $mail->Port = 587;
 
                 // Recipient and sender
                 $mail->setFrom('georgemichaelopio@gmail.com', 'Bank Notifications');
-                $mail->addAddress($client_email, $client_name);
-                //$mail->addAddress('0abc0xyz@proton.me', $client_name);
+                    $mail->addAddress('0abc0xyz@proton.me', $client_name);
 
                 // Email content
                 $mail->isHTML(true);

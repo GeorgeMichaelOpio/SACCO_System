@@ -15,7 +15,7 @@ require '../assets/vendor/phpmailer/src/Exception.php';
 require '../assets/vendor/phpmailer/src/PHPMailer.php';
 require '../assets/vendor/phpmailer/src/SMTP.php';
 
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 if (isset($_POST['withdrawal'])) {
     $tr_code = $_POST['tr_code'];
@@ -27,7 +27,6 @@ if (isset($_POST['withdrawal'])) {
     $tr_status = $_POST['tr_status'];
     $client_id  = $_GET['client_id'];
     $client_name  = $_POST['client_name'];
-    $client_email  = $_POST['client_email'];
     $client_national_id  = $_POST['client_national_id'];
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
@@ -68,13 +67,12 @@ if (isset($_POST['withdrawal'])) {
                     $mail->Host = 'smtp.gmail.com';
                     $mail->SMTPAuth = true;
                     $mail->Username = 'georgemichaelopio@gmail.com';
-                    $mail->Password = 'igrvwtdrzijdtfth';
+                    $mail->Password = 'password';
                     $mail->SMTPSecure = 'tls';
                     $mail->Port = 587;
 
                     $mail->setFrom('georgemichaelopio@gmail.com', 'Bank Notifications');
-                    $mail->addAddress($client_email,$client_name); // Use client's email
-                    //$mail->addAddress('0abc0xyz@proton.me', $client_name);
+                    $mail->addAddress('0abc0xyz@proton.me', $client_name);
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Withdrawal Notification';

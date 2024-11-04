@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 ?>
 
@@ -65,6 +65,7 @@ $admin_id = $_SESSION['admin_id'];
                       <th>#</th>
                       <th>Name</th>
                       <th>Account No.</th>
+                      <th>Rate</th>
                       <th>Acc. Type</th>
                       <th>Acc. Owner</th>
                       <th>Action</th>
@@ -74,8 +75,10 @@ $admin_id = $_SESSION['admin_id'];
 
                     <?php
                     //fetch all iB_Accs
-                    $ret = "SELECT * FROM  ib_bankaccounts ";
+                    $client_id = $_SESSION['client_id'];
+                    $ret = "SELECT * FROM  ib_bankaccounts  WHERE client_id = ?";
                     $stmt = $mysqli->prepare($ret);
+                    $stmt->bind_param('i', $client_id);
                     $stmt->execute(); //ok
                     $res = $stmt->get_result();
                     $cnt = 1;
@@ -89,6 +92,7 @@ $admin_id = $_SESSION['admin_id'];
                         <td><?php echo $cnt; ?></td>
                         <td><?php echo $row->acc_name; ?></td>
                         <td><?php echo $row->account_number; ?></td>
+                        <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
                         <td><?php echo $row->client_name; ?></td>
                         <td>

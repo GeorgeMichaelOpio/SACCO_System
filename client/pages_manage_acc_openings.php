@@ -3,8 +3,22 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
+//fire staff
+if (isset($_GET['deleteBankAcc'])) {
+  $id = intval($_GET['deleteBankAcc']);
+  $adn = "DELETE FROM  ib_bankaccounts  WHERE account_id = ?";
+  $stmt = $mysqli->prepare($adn);
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  $stmt->close();
 
+  if ($stmt) {
+    $info = "Cheapy Account Closed";
+  } else {
+    $err = "Try Again Later";
+  }
+}
 ?>
 
 <!doctype html>
@@ -56,29 +70,32 @@ $admin_id = $_SESSION['admin_id'];
           <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Hoverable Table rows -->
             <div class="card">
-              <h5 class="card-header">Loan Application</h5>
-              <h7 class="card-header">Select on any account to apply for loan</h7>
+              <h5 class="card-header">Manage Banking Accounts </br> Select on any action options to manage your accounts</h5>
               <div class="table-responsive">
-              <table id="export"  class="table table-hover table-bordered table-striped">
+                <table id="export" class="table table-hover table-bordered table-striped">
                   <thead>
                     <tr>
                       <th>#</th>
                       <th>Name</th>
-                      <th>Account No.</th>
-                      <th>Acc. Type</th>
-                      <th>Acc. Owner</th>
-                      <th>Action</th>
+                      <th>Acc Number</th>
+                      <th>Rate</th>
+                      <th>Acc Type</th>
+                      <th>Acc Owner</th>
+                      <th>Date Opened</th>
+                    
                     </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
 
                     <?php
-                    //fetch all iB_Accs
-                    $ret = "SELECT * FROM  ib_bankaccounts ";
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
-                    $cnt = 1;
+                   //fetch all iB_Accs
+                   $client_id = $_SESSION['client_id'];
+                   $ret = "SELECT * FROM  ib_bankaccounts WHERE client_id =? ";
+                   $stmt = $mysqli->prepare($ret);
+                   $stmt->bind_param('i', $client_id);
+                   $stmt->execute(); //ok
+                   $res = $stmt->get_result();
+                   $cnt = 1;
                     while ($row = $res->fetch_object()) {
                       //Trim Timestamp to DD-MM-YYYY : H-M-S
                       $dateOpened = $row->created_at;
@@ -89,18 +106,11 @@ $admin_id = $_SESSION['admin_id'];
                         <td><?php echo $cnt; ?></td>
                         <td><?php echo $row->acc_name; ?></td>
                         <td><?php echo $row->account_number; ?></td>
+                        <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
                         <td><?php echo $row->client_name; ?></td>
-                        <td>
-                          <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                              <i class="ri-more-2-line"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                              <a class="dropdown-item" href="pages_loan_request_form.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>"><i class="ri-pencil-line me-1"></i>Request Loan</a>
-                            </div>
-                          </div>
-                        </td>
+                        <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
+                        
                       </tr>
                     <?php $cnt = $cnt + 1;
                     } ?>
@@ -126,8 +136,8 @@ $admin_id = $_SESSION['admin_id'];
   <!-- / Layout wrapper -->
 
 
-    <!-- script -->
-    <?php include 'components/script.php'; ?>
+ <!-- script -->
+ <?php include 'components/script.php'; ?>
 
    <!-- page script -->
    <script>

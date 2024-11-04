@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 ?>
 
@@ -49,6 +49,18 @@ $admin_id = $_SESSION['admin_id'];
         <!-- NavBar -->
         <?php include 'components/nav_bar.php'; ?>
 
+        <?php
+        $client_id = $_SESSION['client_id'];
+        $ret = "SELECT * FROM  ib_clients WHERE client_id =? ";
+        $stmt = $mysqli->prepare($ret);
+        $stmt->bind_param('i', $client_id);
+        $stmt->execute(); //ok
+        $res = $stmt->get_result();
+        $cnt = 1;
+        while ($row = $res->fetch_object()) {
+
+        ?>
+
         <!-- Content wrapper -->
         <div class="content-wrapper">
           <!-- Content -->
@@ -56,48 +68,52 @@ $admin_id = $_SESSION['admin_id'];
           <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Hoverable Table rows -->
             <div class="card">
-              <h5 class="card-header">Loan Application</h5>
-              <h7 class="card-header">Select on any account to apply for loan</h7>
+              <h5 class="card-header"><?php echo $row->name; ?> Cheapy Accounts</h5>
+              <h7 class="card-header">Select on any action options to manage enquiries</h7>
               <div class="table-responsive">
-              <table id="export"  class="table table-hover table-bordered table-striped">
+                <table id="export"  class="table table-hover table-bordered table-striped">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Account No.</th>
-                      <th>Acc. Type</th>
-                      <th>Acc. Owner</th>
-                      <th>Action</th>
+                    <th>#</th>
+                                                <th>Name</th>
+                                                <th>Account No.</th>
+                                                <th>Rate</th>
+                                                <th>Acc. Type</th>
+                                                <th>Acc. Owner</th>
+                                                <th>Date Opened</th>
+                                                <th>Action</th>
                     </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
+                  <?php
+                                  //fetch all iB_Accs Which belongs to selected client
+                                  $client_id = $_SESSION['client_id'];
+                                  $ret = "SELECT * FROM  ib_bankaccounts WHERE client_id = ?";
+                                  $stmt = $mysqli->prepare($ret);
+                                  $stmt->bind_param('i', $client_id);
+                                  $stmt->execute(); //ok
+                                  $res = $stmt->get_result();
+                                  $cnt = 1;
+                                            while ($row = $res->fetch_object()) {
+                                                //Trim Timestamp to DD-MM-YYYY : H-M-S
+                                                $dateOpened = $row->created_at;
 
-                    <?php
-                    //fetch all iB_Accs
-                    $ret = "SELECT * FROM  ib_bankaccounts ";
-                    $stmt = $mysqli->prepare($ret);
-                    $stmt->execute(); //ok
-                    $res = $stmt->get_result();
-                    $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-                      //Trim Timestamp to DD-MM-YYYY : H-M-S
-                      $dateOpened = $row->created_at;
-
-                    ?>
-
+                                            ?>
                       <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->acc_name; ?></td>
-                        <td><?php echo $row->account_number; ?></td>
-                        <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->client_name; ?></td>
+                      <td><?php echo $cnt; ?></td>
+                                                    <td><?php echo $row->acc_name; ?></td>
+                                                    <td><?php echo $row->account_number; ?></td>
+                                                    <td><?php echo $row->acc_rates; ?>%</td>
+                                                    <td><?php echo $row->acc_type; ?></td>
+                                                    <td><?php echo $row->client_name; ?></td>
+                                                    <td><?php echo date("d-M-Y", strtotime($dateOpened)); ?></td>
                         <td>
                           <div class="dropdown">
                             <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                               <i class="ri-more-2-line"></i>
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="pages_loan_request_form.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>"><i class="ri-pencil-line me-1"></i>Request Loan</a>
+                              <a class="dropdown-item" href="pages_check_client_acc_balance.php?account_id=<?php echo $row->account_id; ?>&acccount_number=<?php echo $row->account_number; ?>"><i class="ri-pencil-line me-1"></i>Check Balance</a>
                             </div>
                           </div>
                         </td>
@@ -108,6 +124,7 @@ $admin_id = $_SESSION['admin_id'];
                 </table>
               </div>
             </div>
+            <?php } ?>
             <!--/ Hoverable Table rows -->
 
           </div>
@@ -126,8 +143,8 @@ $admin_id = $_SESSION['admin_id'];
   <!-- / Layout wrapper -->
 
 
-    <!-- script -->
-    <?php include 'components/script.php'; ?>
+   <!-- script -->
+   <?php include 'components/script.php'; ?>
 
    <!-- page script -->
    <script>

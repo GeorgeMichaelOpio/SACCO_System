@@ -32,6 +32,7 @@ if (isset($_POST['deposit'])) {
     $tr_status = $_POST['tr_status'];
     $client_id  = $_GET['client_id'];
     $client_name  = $_POST['client_name'];
+    $client_email  = $_POST['client_email'];
     $client_national_id  = $_POST['client_national_id'];
     $transaction_amt = $_POST['transaction_amt'];
     $client_phone = $_POST['client_phone'];
@@ -60,13 +61,14 @@ if (isset($_POST['deposit'])) {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'georgemichaelopio@gmail.com'; // Gmail username
-            $mail->Password = 'password'; // Gmail app-specific password
+            $mail->Password = 'igrvwtdrzijdtfth'; // Gmail app-specific password
             $mail->SMTPSecure = 'ssl';
             $mail->Port = 465;
 
             // Recipients
-            $mail->setFrom('georgemichaelopio@gmail.com', 'Cheapy');
-            $mail->addAddress('0abc0xyz@proton.me'); // Use client's email
+            $mail->setFrom('georgemichaelopio@gmail.com', 'Bank Notifications');
+            //$mail->addAddress('0abc0xyz@proton.me'); // Use client's email
+            $mail->addAddress($client_email,$client_name); // Use client's email
 
             // Content
             $mail->isHTML(true);

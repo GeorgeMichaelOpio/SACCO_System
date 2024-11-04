@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 ?>
 
@@ -54,62 +54,75 @@ $admin_id = $_SESSION['admin_id'];
           <!-- Content -->
 
           <div class="container-xxl flex-grow-1 container-p-y">
-            <!-- Hoverable Table rows -->
-            <div class="card">
-              <h5 class="card-header">Loan Application</h5>
-              <h7 class="card-header">Select on any account to apply for loan</h7>
-              <div class="table-responsive">
-              <table id="export"  class="table table-hover table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Account No.</th>
-                      <th>Acc. Type</th>
-                      <th>Acc. Owner</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody class="table-border-bottom-0">
+            <div class="row gy-6">
+              <!-- Data Tables -->
+              <div class="col-12">
+                <div class="card overflow-hidden">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <h5 class="card-title m-0 me-2">Transfers</h5>
 
-                    <?php
-                    //fetch all iB_Accs
-                    $ret = "SELECT * FROM  ib_bankaccounts ";
+                    </div>
+                    <h7>All Transactions Under Transfer Category</h5>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table id="export"  class="table table-hover table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Transaction Code</th>
+                          <th>Account No.</th>
+                          <th>Amount</th>
+                          <th>Acc. Owner</th>
+                          <th>Timestamp</th>
+
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        <?php
+                        //Get latest deposits transactions 
+                        $client_id = $_SESSION['client_id'];
+                    $ret = "SELECT * FROM  ib_transactions  WHERE tr_type = 'Transfer'AND client_id =? ";
                     $stmt = $mysqli->prepare($ret);
+                    $stmt->bind_param('i', $client_id);
                     $stmt->execute(); //ok
                     $res = $stmt->get_result();
                     $cnt = 1;
-                    while ($row = $res->fetch_object()) {
-                      //Trim Timestamp to DD-MM-YYYY : H-M-S
-                      $dateOpened = $row->created_at;
+                        while ($row = $res->fetch_object()) {
+                          /* Trim Transaction Timestamp to 
+                            *  User Uderstandable Formart  DD-MM-YYYY :
+                            */
+                          $transTstamp = $row->created_at;
+                          //Perfom some lil magic here
+                          if ($row->tr_type == 'Deposit') {
+                            $alertClass = "<span class='badge badge-success'>$row->tr_type</span>";
+                          } elseif ($row->tr_type == 'Withdrawal') {
+                            $alertClass = "<span class='badge badge-danger'>$row->tr_type</span>";
+                          } else {
+                            $alertClass = "<span class='badge badge-warning'>$row->tr_type</span>";
+                          }
+                        ?>
 
-                    ?>
+                          <tr class="border-transparent">
+                            <td><?php echo $cnt; ?></td>
+                            <td><?php echo $row->tr_code; ?></a></td>
+                            <td><?php echo $row->account_number; ?></td>
+                            <td>$ <?php echo $row->transaction_amt; ?></td>
+                            <td><?php echo $row->client_name; ?></td>
+                            <td><?php echo date("d-M-Y h:m:s ", strtotime($transTstamp)); ?></td>
+                          </tr>
+                        <?php $cnt = $cnt + 1;
+                        } ?>
 
-                      <tr>
-                        <td><?php echo $cnt; ?></td>
-                        <td><?php echo $row->acc_name; ?></td>
-                        <td><?php echo $row->account_number; ?></td>
-                        <td><?php echo $row->acc_type; ?></td>
-                        <td><?php echo $row->client_name; ?></td>
-                        <td>
-                          <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                              <i class="ri-more-2-line"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                              <a class="dropdown-item" href="pages_loan_request_form.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>"><i class="ri-pencil-line me-1"></i>Request Loan</a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    <?php $cnt = $cnt + 1;
-                    } ?>
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
+              <!--/ Data Tables -->
             </div>
-            <!--/ Hoverable Table rows -->
-
           </div>
           <!-- / Content -->
 
@@ -125,12 +138,24 @@ $admin_id = $_SESSION['admin_id'];
   </div>
   <!-- / Layout wrapper -->
 
+  <!-- script -->
+  <?php include 'components/script.php'; ?>
 
-    <!-- script -->
-    <?php include 'components/script.php'; ?>
-
-   <!-- page script -->
-   <script>
+  <script>
+    $(function() {
+      $("#example1").DataTable();
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+      });
+    });
+  </script>
+  
+  <script>
     $('#export').DataTable({
       dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
       buttons: {

@@ -43,7 +43,7 @@
           <li><a href="#contact">Contact</a></li>
           <li class="dropdown"><a href="#"><span>Login</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Client</a></li>
+              <li><a href="client/pages_login.php">Client</a></li>
               <li><a href="admin/pages_login.php">Admin</a></li>
             </ul>
           </li>

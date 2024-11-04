@@ -3,7 +3,7 @@ session_start();
 include('conf/config.php');
 include('conf/checklogin.php');
 check_login();
-$admin_id = $_SESSION['admin_id'];
+$client_id = $_SESSION['client_id'];
 
 ?>
 
@@ -56,15 +56,16 @@ $admin_id = $_SESSION['admin_id'];
           <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Hoverable Table rows -->
             <div class="card">
-              <h5 class="card-header">Loan Application</h5>
-              <h7 class="card-header">Select on any account to apply for loan</h7>
+              <h5 class="card-header">Deposits</h5>
+              <h7 class="card-header">Select on any account to deposit money</h7>
               <div class="table-responsive">
-              <table id="export"  class="table table-hover table-bordered table-striped">
+                <table id="export" class="table table-hover table-bordered table-striped">
                   <thead>
                     <tr>
                       <th>#</th>
                       <th>Name</th>
                       <th>Account No.</th>
+                      <th>Rate</th>
                       <th>Acc. Type</th>
                       <th>Acc. Owner</th>
                       <th>Action</th>
@@ -74,8 +75,10 @@ $admin_id = $_SESSION['admin_id'];
 
                     <?php
                     //fetch all iB_Accs
-                    $ret = "SELECT * FROM  ib_bankaccounts ";
+                    $client_id = $_SESSION['client_id'];
+                    $ret = "SELECT * FROM  ib_bankaccounts  WHERE client_id = ?";
                     $stmt = $mysqli->prepare($ret);
+                    $stmt->bind_param('i', $client_id);
                     $stmt->execute(); //ok
                     $res = $stmt->get_result();
                     $cnt = 1;
@@ -89,6 +92,7 @@ $admin_id = $_SESSION['admin_id'];
                         <td><?php echo $cnt; ?></td>
                         <td><?php echo $row->acc_name; ?></td>
                         <td><?php echo $row->account_number; ?></td>
+                        <td><?php echo $row->acc_rates; ?>%</td>
                         <td><?php echo $row->acc_type; ?></td>
                         <td><?php echo $row->client_name; ?></td>
                         <td>
@@ -97,7 +101,7 @@ $admin_id = $_SESSION['admin_id'];
                               <i class="ri-more-2-line"></i>
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="pages_loan_request_form.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>"><i class="ri-pencil-line me-1"></i>Request Loan</a>
+                              <a class="dropdown-item" href="pages_deposit_money.php?account_id=<?php echo $row->account_id; ?>&account_number=<?php echo $row->account_number; ?>&client_id=<?php echo $row->client_id; ?>"><i class="ri-pencil-line me-1"></i> Deposit</a>
                             </div>
                           </div>
                         </td>
@@ -126,11 +130,11 @@ $admin_id = $_SESSION['admin_id'];
   <!-- / Layout wrapper -->
 
 
-    <!-- script -->
-    <?php include 'components/script.php'; ?>
+  <!-- script -->
+  <?php include 'components/script.php'; ?>
 
-   <!-- page script -->
-   <script>
+  <!-- page script -->
+  <script>
     $('#export').DataTable({
       dom: '<"row"<"col-md-12"<"row"<"col-md-6"B><"col-md-6"f> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >',
       buttons: {
